@@ -1,2 +1,2 @@
-# Simple_C--_Compiler
-Lab of Compilers course, using flex and bison
+# Simple C Compiler
+Lab of Compiler Principle Course, using flex and bison
