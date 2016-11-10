@@ -1,4 +1,10 @@
 #include <string.h> 
+#include <unistd.h>
+#include <stdio.h> 
+#include <stdlib.h>
+#include <math.h>
+#include <stdarg.h>//变长参数函数所需的头文件
+
 
 extern int yylineno;//行号
 extern char* yytext;//词

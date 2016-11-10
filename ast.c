@@ -1,10 +1,7 @@
-# include<stdio.h>
-# include<stdlib.h>
-# include<stdarg.h>//变长参数函数所需的头文件
-# include"ast.h"
+#include "ast.h"
 
 int i;
-struct ast *newast(char* name,int num,...)//抽象语法树建立
+struct ast *newast(char*  name,int num,...)//抽象语法树建立
 {
     va_list valist; //定义变长参数列表
     struct ast *a=(struct ast*)malloc(sizeof(struct ast));//新生成的父节点
@@ -43,11 +40,50 @@ struct ast *newast(char* name,int num,...)//抽象语法树建立
         if(!strcmp(a->name,"INTEGER"))//函数符号表头指针a->name,"INTEGER"))
         {
             a->type="int";
+            a->value=atof(yytext);
         }
         else if(!strcmp(a->name,"FLOAT"))
         {
             a->type="float";
             a->value=atof(yytext);
+        }
+        else if(!strcmp(a->name,"OCT"))
+        {
+            a->type="oct";
+
+            char * p = yytext;
+            //int str_len(char *s);
+            int length = strlen(p);
+            int n=0, k=1;
+            
+            for (int i = length-1; i > 0; i--)
+            {
+                n += k*(p[i]-48);
+                k *= 8;
+            }
+            a->value=n;
+        }
+        else if(!strcmp(a->name,"HEX"))
+        {
+            a->type="hex";
+
+            char * p = yytext;
+            //int str_len(char *s);
+            int length = strlen(p);
+            int n=0, k=1;
+
+            for (int i = length-1; i > 1; i--)
+            {
+                if(p[i]>=48 && p[i]<=57) // 0-9
+                    n += k*(p[i]-48);
+                if(p[i]>=65 && p[i]<=90) //A-Z
+                    n += k*(p[i]-55);
+                if(p[i]>=97 && p[i]<=122) { // a-z
+                    n += (p[i]-87)*k;
+                }   
+                k *= 16;
+            }
+            a->value=n;
         }
         else
         {
@@ -69,7 +105,7 @@ void eval(struct ast *a,int level)//先序遍历抽象语法树
         {
             printf("%s ",a->name);//打印语法单元名字，ID/TYPE/INTEGER要打印yytext的值
             if((!strcmp(a->name,"ID"))||(!strcmp(a->name,"TYPE")))printf(":%s ",a->content);
-            else if(!strcmp(a->name,"INTEGER"))printf(":%s",a->type);
+            else if(!strcmp(a->name,"INTEGER")||(!strcmp(a->name,"OCT"))||(!strcmp(a->name,"HEX")))printf(":%0.0f",a->value);
             else
                 printf("(%d)",a->line);
         }

@@ -1,10 +1,11 @@
-%option noyywrap nodefault yylineno
+%option noyywrap yylineno
 %{
-#include "stdio.h"
-#include "stdlib.h"
-# include "ast.h"
-#include "bison.tab.h"
+#include "ast.h"
+#include "parser.tab.h"
 %}
+
+OCT			[0][1-7]+[0-7]*
+HEX			[0][Xx][0-9A-Fa-f]*
 
 TYPE int|float
 STRUCT struct
@@ -35,6 +36,7 @@ LB \[
 RB \]
 LC \{
 RC \}
+
 AERROR .
 %%
 int|float {yylval.a=newast("TYPE",0,yylineno);return TYPE;}
@@ -46,6 +48,9 @@ struct {yylval.a=newast("STRUCT",0,yylineno);return STRUCT;}
 {PLUS} {yylval.a=newast("PLUS",0,yylineno); return PLUS;}
 {MINUS} {yylval.a=newast("MINUS",0,yylineno); return MINUS;}
 {INTEGER} {yylval.a=newast("INTEGER",0,yylineno); return INTEGER;}
+{FLOAT} {yylval.a=newast("FLOAT",0,yylineno); return INTEGER;}
+{OCT} {yylval.a=newast("OCT",0,yylineno); return OCT;}
+{HEX} {yylval.a=newast("HEX",0,yylineno); return HEX;}
 {ID} {yylval.a=newast("ID",0,yylineno); return ID;}
 {SPACE} {}
 {EOL} {}
@@ -65,6 +70,7 @@ struct {yylval.a=newast("STRUCT",0,yylineno);return STRUCT;}
 {RB} {yylval.a=newast("RB",0,yylineno); return RB;}
 {LC} {yylval.a=newast("LC",0,yylineno); return LC;}
 {RC} {yylval.a=newast("RC",0,yylineno); return RC;}
+
 {AERROR} { printf("Error type A at line %d: Mystirious charachter '%s'\n",yylineno,yytext);}
 
 %%
