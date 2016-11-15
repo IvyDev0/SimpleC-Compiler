@@ -4,9 +4,6 @@
 #include "parser.tab.h"
 %}
 
-OCT			[0][1-7]+[0-7]*
-HEX			[0][Xx][0-9A-Fa-f]*
-
 TYPE int|float
 STRUCT struct
 RETURN return
@@ -17,6 +14,8 @@ PLUS \+
 MINUS -
 INTEGER [1-9]+[0-9]*|0 
 FLOAT   [0-9]+\.[0-9]*  
+OCT			[0][1-7]+[0-7]*
+HEX			[0][Xx][0-9A-Fa-f]*
 ID [a-z_A-Z][a-zA-Z_0-9]*
 SPACE [ \t\r]*
 EOL \n
