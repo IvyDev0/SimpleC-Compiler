@@ -69,6 +69,8 @@ struct {yylval.a=newast("STRUCT",0,yylineno);return STRUCT;}
 {RB} {yylval.a=newast("RB",0,yylineno); return RB;}
 {LC} {yylval.a=newast("LC",0,yylineno); return LC;}
 {RC} {yylval.a=newast("RC",0,yylineno); return RC;}
+\/\/[^\n]*  {}  /* line annotation */
+"/*"([^\*]|\*[^/])*"*/" 
 
 {AERROR} { printf("Error type A at line %d: Mystirious charachter '%s'\n",yylineno,yytext);}
 
