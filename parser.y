@@ -7,7 +7,7 @@ struct ast* a;
 double d;
 }
 /*declare tokens*/
-%token  <a> INTEGER FLOAT OCT HEX
+%token  <a> INTEGER FLOAT 
 %token <a> TYPE STRUCT RETURN IF ELSE WHILE ID SPACE SEMI COMMA ASSIGNOP RELOP PLUS
 MINUS STAR DIV AND OR DOT NOT LP RP LB RB LC RC AERROR
 %token <a> EOL
@@ -107,8 +107,6 @@ Exp:Exp ASSIGNOP Exp{$$=newast("Exp",3,$1,$2,$3);}
         |ID {$$=newast("Exp",1,$1);}
         |INTEGER {$$=newast("Exp",1,$1);}
         |FLOAT{$$=newast("Exp",1,$1);}
-        |OCT{$$=newast("Exp",1,$1);}
-        |HEX{$$=newast("Exp",1,$1);}
         ;
 Args:Exp COMMA Args {$$=newast("Args",3,$1,$2,$3);}
         |Exp {$$=newast("Args",1,$1);}
