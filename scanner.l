@@ -1,7 +1,6 @@
 %option noyywrap yylineno
 %{
-#include "ast.h"
-#include "parser.tab.h"
+#include "parser.tab.h" /* for token definitions and yylval */
 %}
 
 TYPE int|float
@@ -70,7 +69,10 @@ struct {yylval.a=newast("STRUCT",0,yylineno);return STRUCT;}
 {LC} {yylval.a=newast("LC",0,yylineno); return LC;}
 {RC} {yylval.a=newast("RC",0,yylineno); return RC;}
 \/\/[^\n]*  {}  /* line annotation */
-"/*"([^\*]|\*[^/])*"*/" 
+"/*"([^\*]|\*[^/])*"*/"  {}  /* block annotation */
+"/*"([^\*]|\*[^/])*$  {printf("line %d: error: undeterminated comment\n",yylineno);}
+"*/"  {printf("line %d: error: undeterminated comment\n",yylineno);}
+
 
 {AERROR} { printf("Error type A at line %d: Mystirious charachter '%s'\n",yylineno,yytext);}
 

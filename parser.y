@@ -25,15 +25,27 @@ OptTag  Tag VarDec  FunDec VarList ParamDec Compst StmtList Stmt DefList Def Dec
 %left STAR DIV
 %right NOT 
 %left LP RP LB RB DOT
+
 %%
-Program: ExtDefList {$$=newast("Program",1,$1);printf("Print syntax tree:\n");eval($$,0);printf("Finish printing.\n\n");}
+Program: ExtDefList {$$=newast("Program",1,$1);}
     ;
+
 ExtDefList:ExtDef ExtDefList {$$=newast("ExtDefList",2,$1,$2);}
     | {$$=newast("ExtDefList",0,-1);}
     ;
-ExtDef:Specifire ExtDecList SEMI  {$$=newast("ExtDef",3,$1,$2,$3);}    
+
+ExtDef:Specifire ExtDecList SEMI  
+    {
+        $$=newast("ExtDef",3,$1,$2,$3);
+        if(existvar($2))  printf("line %d: error: redefined variable '%s'\n",yylineno,$2->content);
+        else  newvar(2,$1,$2);
+    }    
     |Specifire SEMI {$$=newast("ExtDef",2,$1,$2);}
-    |Specifire FunDec Compst    {$$=newast("ExtDef",3,$1,$2,$3);}
+    |Specifire FunDec Compst    
+    {
+        $$=newast("ExtDef",3,$1,$2,$3);
+        newfunc(4,$1)
+    }
     ;
 ExtDecList:VarDec {$$=newast("ExtDecList",1,$1);}
     |VarDec COMMA ExtDecList {$$=newast("ExtDecList",3,$1,$2,$3);}

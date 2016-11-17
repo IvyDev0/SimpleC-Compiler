@@ -6,8 +6,8 @@
 #include <stdarg.h>//变长参数函数所需的头文件
 
 
-extern int yylineno;//行号
-extern char* yytext;//词
+extern int yylineno;
+extern char* yytext;
 extern int yyparse();
 extern int yylex();
 extern void yyerror(char*s,...);
