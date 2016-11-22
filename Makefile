@@ -1,9 +1,6 @@
-result:parser.y scanner.l ast.h
+result:parser.y scanner.l ast.h ast.c
 	bison -d parser.y
 	flex scanner.l 
 	gcc parser.tab.c lex.yy.c ast.c -o parse
-	rm parser.tab.c
-	rm parser.tab.h
-	rm lex.yy.c
 	cat input.c | ./parse
 	

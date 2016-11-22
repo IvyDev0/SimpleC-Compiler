@@ -1,5 +1,6 @@
 %option noyywrap yylineno
 %{
+#include "ast.h"
 #include "parser.tab.h" /* for token definitions and yylval */
 %}
 

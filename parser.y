@@ -37,7 +37,8 @@ ExtDefList:ExtDef ExtDefList {$$=newast("ExtDefList",2,$1,$2);}
 ExtDef:Specifire ExtDecList SEMI  
     {
         $$=newast("ExtDef",3,$1,$2,$3);
-        if(existvar($2))  printf("line %d: error: redefined variable '%s'\n",yylineno,$2->content);
+        if(existvar($2))  
+            printf("line %d: error: redefined variable '%s'\n",yylineno,$2->content);
         else  newvar(2,$1,$2);
     }    
     |Specifire SEMI {$$=newast("ExtDef",2,$1,$2);}

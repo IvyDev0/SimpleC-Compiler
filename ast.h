@@ -74,7 +74,7 @@ void eval(struct ast*,int level);
 void newvar(int num,...);
 
 /*查找变量是否已经定义,是返回1，否返回0*/
-int  exitvar(struct ast*tp);
+int existvar(struct ast*tp);
 
 /*查找变量类型*/
 char* typevar(struct ast*tp);
@@ -84,7 +84,7 @@ char* typevar(struct ast*tp);
 void newfunc(int num,...);
 
 /*查找函数是否已经定义,是返回1，否返回0*/
-int exitfunc(struct ast*tp);
+int existfunc(struct ast*tp);
 
 /*查找函数类型*/
 char* typefunc(struct ast*tp);
@@ -97,7 +97,7 @@ int pnumfunc(struct ast*tp);
 void newarray(int num,...);
 
 /*查找数组是否已经定义,是返回1，否返回0*/
-int exitarray(struct ast*tp);
+int existarray(struct ast*tp);
 
 /*查找数组类型*/
 char* typearray(struct ast*tp);
@@ -107,4 +107,4 @@ char* typearray(struct ast*tp);
 void newstruc(int num,...);
 
 /*查找结构体是否已经定义,是返回1，否返回0*/
-int exitstruc(struct ast*tp);
+int existstruc(struct ast*tp);

@@ -495,13 +495,13 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    29,    29,    31,    32,    34,    35,    36,    38,    39,
-      42,    43,    45,    46,    48,    49,    51,    54,    55,    57,
-      58,    60,    61,    63,    67,    69,    70,    72,    73,    74,
-      75,    76,    77,    80,    81,    83,    85,    86,    88,    89,
-      92,    93,    94,    95,    96,    97,    98,    99,   100,   101,
-     102,   103,   104,   105,   106,   107,   108,   109,   110,   111,
-     113,   114
+       0,    30,    30,    33,    34,    37,    44,    45,    51,    52,
+      55,    56,    58,    59,    61,    62,    64,    67,    68,    70,
+      71,    73,    74,    76,    80,    82,    83,    85,    86,    87,
+      88,    89,    90,    93,    94,    96,    98,    99,   101,   102,
+     105,   106,   107,   108,   109,   110,   111,   112,   113,   114,
+     115,   116,   117,   118,   119,   120,   121,   122,   123,   124,
+     126,   127
 };
 #endif
 
@@ -1504,308 +1504,316 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 29 "parser.y"
-    {(yyval.a)=newast("Program",1,(yyvsp[(1) - (1)].a));printf("Print syntax tree:\n");eval((yyval.a),0);printf("Finish printing.\n\n");;}
+#line 30 "parser.y"
+    {(yyval.a)=newast("Program",1,(yyvsp[(1) - (1)].a));;}
     break;
 
   case 3:
-#line 31 "parser.y"
+#line 33 "parser.y"
     {(yyval.a)=newast("ExtDefList",2,(yyvsp[(1) - (2)].a),(yyvsp[(2) - (2)].a));;}
     break;
 
   case 4:
-#line 32 "parser.y"
+#line 34 "parser.y"
     {(yyval.a)=newast("ExtDefList",0,-1);;}
     break;
 
   case 5:
-#line 34 "parser.y"
-    {(yyval.a)=newast("ExtDef",3,(yyvsp[(1) - (3)].a),(yyvsp[(2) - (3)].a),(yyvsp[(3) - (3)].a));;}
+#line 38 "parser.y"
+    {
+        (yyval.a)=newast("ExtDef",3,(yyvsp[(1) - (3)].a),(yyvsp[(2) - (3)].a),(yyvsp[(3) - (3)].a));
+        if(existvar((yyvsp[(2) - (3)].a)))  
+            printf("line %d: error: redefined variable '%s'\n",yylineno,(yyvsp[(2) - (3)].a)->content);
+        else  newvar(2,(yyvsp[(1) - (3)].a),(yyvsp[(2) - (3)].a));
+    ;}
     break;
 
   case 6:
-#line 35 "parser.y"
+#line 44 "parser.y"
     {(yyval.a)=newast("ExtDef",2,(yyvsp[(1) - (2)].a),(yyvsp[(2) - (2)].a));;}
     break;
 
   case 7:
-#line 36 "parser.y"
-    {(yyval.a)=newast("ExtDef",3,(yyvsp[(1) - (3)].a),(yyvsp[(2) - (3)].a),(yyvsp[(3) - (3)].a));;}
+#line 46 "parser.y"
+    {
+        (yyval.a)=newast("ExtDef",3,(yyvsp[(1) - (3)].a),(yyvsp[(2) - (3)].a),(yyvsp[(3) - (3)].a));
+        newfunc(4,(yyvsp[(1) - (3)].a))
+    ;}
     break;
 
   case 8:
-#line 38 "parser.y"
+#line 51 "parser.y"
     {(yyval.a)=newast("ExtDecList",1,(yyvsp[(1) - (1)].a));;}
     break;
 
   case 9:
-#line 39 "parser.y"
+#line 52 "parser.y"
     {(yyval.a)=newast("ExtDecList",3,(yyvsp[(1) - (3)].a),(yyvsp[(2) - (3)].a),(yyvsp[(3) - (3)].a));;}
     break;
 
   case 10:
-#line 42 "parser.y"
+#line 55 "parser.y"
     {(yyval.a)=newast("Specifire",1,(yyvsp[(1) - (1)].a));;}
     break;
 
   case 11:
-#line 43 "parser.y"
+#line 56 "parser.y"
     {(yyval.a)=newast("Specifire",1,(yyvsp[(1) - (1)].a));;}
     break;
 
   case 12:
-#line 45 "parser.y"
+#line 58 "parser.y"
     {(yyval.a)=newast("StructSpecifire",5,(yyvsp[(1) - (5)].a),(yyvsp[(2) - (5)].a),(yyvsp[(3) - (5)].a),(yyvsp[(4) - (5)].a),(yyvsp[(5) - (5)].a));;}
     break;
 
   case 13:
-#line 46 "parser.y"
+#line 59 "parser.y"
     {(yyval.a)=newast("StructSpecifire",2,(yyvsp[(1) - (2)].a),(yyvsp[(2) - (2)].a));;}
     break;
 
   case 14:
-#line 48 "parser.y"
+#line 61 "parser.y"
     {(yyval.a)=newast("OptTag",1,(yyvsp[(1) - (1)].a));;}
     break;
 
   case 15:
-#line 49 "parser.y"
+#line 62 "parser.y"
     {(yyval.a)=newast("OptTag",0,-1);;}
     break;
 
   case 16:
-#line 51 "parser.y"
+#line 64 "parser.y"
     {(yyval.a)=newast("Tag",1,(yyvsp[(1) - (1)].a));;}
     break;
 
   case 17:
-#line 54 "parser.y"
+#line 67 "parser.y"
     {(yyval.a)=newast("VarDec",1,(yyvsp[(1) - (1)].a));;}
     break;
 
   case 18:
-#line 55 "parser.y"
+#line 68 "parser.y"
     {(yyval.a)=newast("VarDec",4,(yyvsp[(1) - (4)].a),(yyvsp[(2) - (4)].a),(yyvsp[(3) - (4)].a),(yyvsp[(4) - (4)].a));;}
     break;
 
   case 19:
-#line 57 "parser.y"
+#line 70 "parser.y"
     {(yyval.a)=newast("FunDec",4,(yyvsp[(1) - (4)].a),(yyvsp[(2) - (4)].a),(yyvsp[(3) - (4)].a),(yyvsp[(4) - (4)].a));;}
     break;
 
   case 20:
-#line 58 "parser.y"
+#line 71 "parser.y"
     {(yyval.a)=newast("FunDec",3,(yyvsp[(1) - (3)].a),(yyvsp[(2) - (3)].a),(yyvsp[(3) - (3)].a));;}
     break;
 
   case 21:
-#line 60 "parser.y"
+#line 73 "parser.y"
     {(yyval.a)=newast("VarList",3,(yyvsp[(1) - (3)].a),(yyvsp[(2) - (3)].a),(yyvsp[(3) - (3)].a));;}
     break;
 
   case 22:
-#line 61 "parser.y"
+#line 74 "parser.y"
     {(yyval.a)=newast("VarList",1,(yyvsp[(1) - (1)].a));;}
     break;
 
   case 23:
-#line 63 "parser.y"
+#line 76 "parser.y"
     {(yyval.a)=newast("ParamDec",2,(yyvsp[(1) - (2)].a),(yyvsp[(2) - (2)].a));;}
     break;
 
   case 24:
-#line 67 "parser.y"
+#line 80 "parser.y"
     {(yyval.a)=newast("Compst",4,(yyvsp[(1) - (4)].a),(yyvsp[(2) - (4)].a),(yyvsp[(3) - (4)].a),(yyvsp[(4) - (4)].a));;}
     break;
 
   case 25:
-#line 69 "parser.y"
+#line 82 "parser.y"
     {(yyval.a)=newast("StmtList",2,(yyvsp[(1) - (2)].a),(yyvsp[(2) - (2)].a));;}
     break;
 
   case 26:
-#line 70 "parser.y"
+#line 83 "parser.y"
     {(yyval.a)=newast("StmtList",0,-1);;}
     break;
 
   case 27:
-#line 72 "parser.y"
+#line 85 "parser.y"
     {(yyval.a)=newast("Stmt",2,(yyvsp[(1) - (2)].a),(yyvsp[(2) - (2)].a));;}
     break;
 
   case 28:
-#line 73 "parser.y"
+#line 86 "parser.y"
     {(yyval.a)=newast("Stmt",1,(yyvsp[(1) - (1)].a));;}
     break;
 
   case 29:
-#line 74 "parser.y"
+#line 87 "parser.y"
     {(yyval.a)=newast("Stmt",3,(yyvsp[(1) - (3)].a),(yyvsp[(2) - (3)].a),(yyvsp[(3) - (3)].a));;}
     break;
 
   case 30:
-#line 75 "parser.y"
+#line 88 "parser.y"
     {(yyval.a)=newast("Stmt",5,(yyvsp[(1) - (5)].a),(yyvsp[(2) - (5)].a),(yyvsp[(3) - (5)].a),(yyvsp[(4) - (5)].a),(yyvsp[(5) - (5)].a));;}
     break;
 
   case 31:
-#line 76 "parser.y"
+#line 89 "parser.y"
     {(yyval.a)=newast("Stmt",7,(yyvsp[(1) - (7)].a),(yyvsp[(2) - (7)].a),(yyvsp[(3) - (7)].a),(yyvsp[(4) - (7)].a),(yyvsp[(5) - (7)].a),(yyvsp[(6) - (7)].a),(yyvsp[(7) - (7)].a));;}
     break;
 
   case 32:
-#line 77 "parser.y"
+#line 90 "parser.y"
     {(yyval.a)=newast("Stmt",5,(yyvsp[(1) - (5)].a),(yyvsp[(2) - (5)].a),(yyvsp[(3) - (5)].a),(yyvsp[(4) - (5)].a),(yyvsp[(5) - (5)].a));;}
     break;
 
   case 33:
-#line 80 "parser.y"
+#line 93 "parser.y"
     {(yyval.a)=newast("DefList",2,(yyvsp[(1) - (2)].a),(yyvsp[(2) - (2)].a));;}
     break;
 
   case 34:
-#line 81 "parser.y"
+#line 94 "parser.y"
     {(yyval.a)=newast("DefList",0,-1);;}
     break;
 
   case 35:
-#line 83 "parser.y"
+#line 96 "parser.y"
     {(yyval.a)=newast("Def",3,(yyvsp[(1) - (3)].a),(yyvsp[(2) - (3)].a),(yyvsp[(3) - (3)].a));;}
     break;
 
   case 36:
-#line 85 "parser.y"
+#line 98 "parser.y"
     {(yyval.a)=newast("DecList",1,(yyvsp[(1) - (1)].a));;}
     break;
 
   case 37:
-#line 86 "parser.y"
+#line 99 "parser.y"
     {(yyval.a)=newast("DecList",3,(yyvsp[(1) - (3)].a),(yyvsp[(2) - (3)].a),(yyvsp[(3) - (3)].a));;}
     break;
 
   case 38:
-#line 88 "parser.y"
+#line 101 "parser.y"
     {(yyval.a)=newast("Dec",1,(yyvsp[(1) - (1)].a));;}
     break;
 
   case 39:
-#line 89 "parser.y"
+#line 102 "parser.y"
     {(yyval.a)=newast("Dec",3,(yyvsp[(1) - (3)].a),(yyvsp[(2) - (3)].a),(yyvsp[(3) - (3)].a));;}
     break;
 
   case 40:
-#line 92 "parser.y"
+#line 105 "parser.y"
     {(yyval.a)=newast("Exp",3,(yyvsp[(1) - (3)].a),(yyvsp[(2) - (3)].a),(yyvsp[(3) - (3)].a));;}
     break;
 
   case 41:
-#line 93 "parser.y"
-    {(yyval.a)=newast("Exp",3,(yyvsp[(1) - (3)].a),(yyvsp[(2) - (3)].a),(yyvsp[(3) - (3)].a));;}
-    break;
-
-  case 42:
-#line 94 "parser.y"
-    {(yyval.a)=newast("Exp",3,(yyvsp[(1) - (3)].a),(yyvsp[(2) - (3)].a),(yyvsp[(3) - (3)].a));;}
-    break;
-
-  case 43:
-#line 95 "parser.y"
-    {(yyval.a)=newast("Exp",3,(yyvsp[(1) - (3)].a),(yyvsp[(2) - (3)].a),(yyvsp[(3) - (3)].a));;}
-    break;
-
-  case 44:
-#line 96 "parser.y"
-    {(yyval.a)=newast("Exp",3,(yyvsp[(1) - (3)].a),(yyvsp[(2) - (3)].a),(yyvsp[(3) - (3)].a));;}
-    break;
-
-  case 45:
-#line 97 "parser.y"
-    {(yyval.a)=newast("Exp",3,(yyvsp[(1) - (3)].a),(yyvsp[(2) - (3)].a),(yyvsp[(3) - (3)].a));;}
-    break;
-
-  case 46:
-#line 98 "parser.y"
-    {(yyval.a)=newast("Exp",3,(yyvsp[(1) - (3)].a),(yyvsp[(2) - (3)].a),(yyvsp[(3) - (3)].a));;}
-    break;
-
-  case 47:
-#line 99 "parser.y"
-    {(yyval.a)=newast("Exp",3,(yyvsp[(1) - (3)].a),(yyvsp[(2) - (3)].a),(yyvsp[(3) - (3)].a));;}
-    break;
-
-  case 48:
-#line 100 "parser.y"
-    {(yyval.a)=newast("Exp",3,(yyvsp[(1) - (3)].a),(yyvsp[(2) - (3)].a),(yyvsp[(3) - (3)].a));;}
-    break;
-
-  case 49:
-#line 101 "parser.y"
-    {(yyval.a)=newast("Exp",2,(yyvsp[(1) - (2)].a),(yyvsp[(2) - (2)].a));;}
-    break;
-
-  case 50:
-#line 102 "parser.y"
-    {(yyval.a)=newast("Exp",2,(yyvsp[(1) - (2)].a),(yyvsp[(2) - (2)].a));;}
-    break;
-
-  case 51:
-#line 103 "parser.y"
-    {(yyval.a)=newast("Exp",4,(yyvsp[(1) - (4)].a),(yyvsp[(2) - (4)].a),(yyvsp[(3) - (4)].a),(yyvsp[(4) - (4)].a));;}
-    break;
-
-  case 52:
-#line 104 "parser.y"
-    {(yyval.a)=newast("Exp",3,(yyvsp[(1) - (3)].a),(yyvsp[(2) - (3)].a),(yyvsp[(3) - (3)].a));;}
-    break;
-
-  case 53:
-#line 105 "parser.y"
-    {(yyval.a)=newast("Exp",4,(yyvsp[(1) - (4)].a),(yyvsp[(2) - (4)].a),(yyvsp[(3) - (4)].a),(yyvsp[(4) - (4)].a));;}
-    break;
-
-  case 54:
 #line 106 "parser.y"
     {(yyval.a)=newast("Exp",3,(yyvsp[(1) - (3)].a),(yyvsp[(2) - (3)].a),(yyvsp[(3) - (3)].a));;}
     break;
 
-  case 55:
+  case 42:
 #line 107 "parser.y"
+    {(yyval.a)=newast("Exp",3,(yyvsp[(1) - (3)].a),(yyvsp[(2) - (3)].a),(yyvsp[(3) - (3)].a));;}
+    break;
+
+  case 43:
+#line 108 "parser.y"
+    {(yyval.a)=newast("Exp",3,(yyvsp[(1) - (3)].a),(yyvsp[(2) - (3)].a),(yyvsp[(3) - (3)].a));;}
+    break;
+
+  case 44:
+#line 109 "parser.y"
+    {(yyval.a)=newast("Exp",3,(yyvsp[(1) - (3)].a),(yyvsp[(2) - (3)].a),(yyvsp[(3) - (3)].a));;}
+    break;
+
+  case 45:
+#line 110 "parser.y"
+    {(yyval.a)=newast("Exp",3,(yyvsp[(1) - (3)].a),(yyvsp[(2) - (3)].a),(yyvsp[(3) - (3)].a));;}
+    break;
+
+  case 46:
+#line 111 "parser.y"
+    {(yyval.a)=newast("Exp",3,(yyvsp[(1) - (3)].a),(yyvsp[(2) - (3)].a),(yyvsp[(3) - (3)].a));;}
+    break;
+
+  case 47:
+#line 112 "parser.y"
+    {(yyval.a)=newast("Exp",3,(yyvsp[(1) - (3)].a),(yyvsp[(2) - (3)].a),(yyvsp[(3) - (3)].a));;}
+    break;
+
+  case 48:
+#line 113 "parser.y"
+    {(yyval.a)=newast("Exp",3,(yyvsp[(1) - (3)].a),(yyvsp[(2) - (3)].a),(yyvsp[(3) - (3)].a));;}
+    break;
+
+  case 49:
+#line 114 "parser.y"
+    {(yyval.a)=newast("Exp",2,(yyvsp[(1) - (2)].a),(yyvsp[(2) - (2)].a));;}
+    break;
+
+  case 50:
+#line 115 "parser.y"
+    {(yyval.a)=newast("Exp",2,(yyvsp[(1) - (2)].a),(yyvsp[(2) - (2)].a));;}
+    break;
+
+  case 51:
+#line 116 "parser.y"
+    {(yyval.a)=newast("Exp",4,(yyvsp[(1) - (4)].a),(yyvsp[(2) - (4)].a),(yyvsp[(3) - (4)].a),(yyvsp[(4) - (4)].a));;}
+    break;
+
+  case 52:
+#line 117 "parser.y"
+    {(yyval.a)=newast("Exp",3,(yyvsp[(1) - (3)].a),(yyvsp[(2) - (3)].a),(yyvsp[(3) - (3)].a));;}
+    break;
+
+  case 53:
+#line 118 "parser.y"
+    {(yyval.a)=newast("Exp",4,(yyvsp[(1) - (4)].a),(yyvsp[(2) - (4)].a),(yyvsp[(3) - (4)].a),(yyvsp[(4) - (4)].a));;}
+    break;
+
+  case 54:
+#line 119 "parser.y"
+    {(yyval.a)=newast("Exp",3,(yyvsp[(1) - (3)].a),(yyvsp[(2) - (3)].a),(yyvsp[(3) - (3)].a));;}
+    break;
+
+  case 55:
+#line 120 "parser.y"
     {(yyval.a)=newast("Exp",1,(yyvsp[(1) - (1)].a));;}
     break;
 
   case 56:
-#line 108 "parser.y"
+#line 121 "parser.y"
     {(yyval.a)=newast("Exp",1,(yyvsp[(1) - (1)].a));;}
     break;
 
   case 57:
-#line 109 "parser.y"
+#line 122 "parser.y"
     {(yyval.a)=newast("Exp",1,(yyvsp[(1) - (1)].a));;}
     break;
 
   case 58:
-#line 110 "parser.y"
+#line 123 "parser.y"
     {(yyval.a)=newast("Exp",1,(yyvsp[(1) - (1)].a));;}
     break;
 
   case 59:
-#line 111 "parser.y"
+#line 124 "parser.y"
     {(yyval.a)=newast("Exp",1,(yyvsp[(1) - (1)].a));;}
     break;
 
   case 60:
-#line 113 "parser.y"
+#line 126 "parser.y"
     {(yyval.a)=newast("Args",3,(yyvsp[(1) - (3)].a),(yyvsp[(2) - (3)].a),(yyvsp[(3) - (3)].a));;}
     break;
 
   case 61:
-#line 114 "parser.y"
+#line 127 "parser.y"
     {(yyval.a)=newast("Args",1,(yyvsp[(1) - (1)].a));;}
     break;
 
 
 /* Line 1267 of yacc.c.  */
-#line 1809 "parser.tab.c"
+#line 1817 "parser.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2019,5 +2027,5 @@ yyreturn:
 }
 
 
-#line 116 "parser.y"
+#line 129 "parser.y"
 

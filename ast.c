@@ -9,7 +9,7 @@ struct ast *newast(char*  name,int num,...)//抽象语法树建立
     if(!a)
     {
         yyerror("out of space");
-        exist(0);
+        exit(0);
     }
     a->name=name;//语法单元名字
     va_start(valist,num);//初始化变长参数为num后的参数
@@ -130,31 +130,31 @@ newvar(int num,...)
     a->type=temp->content;
     temp=va_arg(valist, struct ast*);// 2nd node in valist
     a->name=temp->content;
-    // ???????
+    // ?
     vartail->next=a;
     vartail=a;
 }
 // check if the variable has already defined
-bool 
+int 
 existvar(struct ast* temp)
 {
     struct var* p=(struct var*)malloc(sizeof(struct var*));
     p=varhead->next;
     int flag=0;
-    while(!=NULL)
+    while(p!=NULL)
     {
         if(!strcmp(p->name,temp->content))
         {
             flag=1;    
-            return true;
+            return 1;
         }
         p=p->next;
     }
     if(!flag)
     {
-        return false;
+        return 0;
     }
-    return false;
+    return 0;
 }
 // search for its type
 char * 
@@ -209,7 +209,7 @@ newfunc(int num,...)
     }
 }
 
-bool 
+int 
 existfunc(struct ast* tp)
 {
     struct func* p=(struct func*)malloc(sizeof(struct func*));
@@ -217,10 +217,10 @@ existfunc(struct ast* tp)
     while(p!=NULL&&p->name!=NULL&&p->tag==1)
     {
         if(!strcmp(p->name,tp->content))
-            return true;
+            return 1;
         p=p->next;
     }
-   return false;
+   return 0;
 }
 
 char * 
