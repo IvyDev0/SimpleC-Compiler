@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <stdarg.h>//变长参数函数所需的头文件
+//#include <exception> 
 
 
 extern int yylineno;
@@ -108,3 +109,5 @@ void newstruc(int num,...);
 
 /*查找结构体是否已经定义,是返回1，否返回0*/
 int existstruc(struct ast*tp);
+
+int ifprvalue(struct ast* tp);

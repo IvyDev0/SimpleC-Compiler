@@ -1,3 +1,5 @@
+// TODO : 符号表的作用域限定
+
 #include "ast.h"
 
 int i;
@@ -29,7 +31,7 @@ struct ast *newast(char*  name,int num,...)//抽象语法树建立
             for(i=0; i<num-1; ++i)//取变长参数列表中的剩余结点，依次设置成兄弟结点
             {
                 temp->r=va_arg(valist,struct ast*);
-                temp=temp->r;
+                temp = temp->r;
             }
         }
     }
@@ -49,7 +51,7 @@ struct ast *newast(char*  name,int num,...)//抽象语法树建立
         }
         else if(!strcmp(a->name,"OCT"))
         {
-            a->type="oct";
+            a->type="int";
 
             char * p = yytext;
             //int str_len(char *s);
@@ -65,10 +67,9 @@ struct ast *newast(char*  name,int num,...)//抽象语法树建立
         }
         else if(!strcmp(a->name,"HEX"))
         {
-            a->type="hex";
+            a->type="int";
 
             char * p = yytext;
-            //int str_len(char *s);
             int length = strlen(p);
             int n=0, k=1;
 
@@ -95,6 +96,7 @@ struct ast *newast(char*  name,int num,...)//抽象语法树建立
     }
     return a;
 }
+
 void eval(struct ast *a,int level)//先序遍历抽象语法树
 {
     if(a!=NULL)
@@ -121,6 +123,7 @@ void eval(struct ast *a,int level)//先序遍历抽象语法树
 void 
 newvar(int num,...)
 {
+    
     va_list valist; // define a variable-length argument list
     // create a parent node and pass the synthesized attribute
     struct var *a=(struct var*)malloc(sizeof(struct var));
@@ -130,22 +133,22 @@ newvar(int num,...)
     a->type=temp->content;
     temp=va_arg(valist, struct ast*);// 2nd node in valist
     a->name=temp->content;
-    // ?
     vartail->next=a;
     vartail=a;
+    a->next = NULL;
 }
 // check if the variable has already defined
 int 
 existvar(struct ast* temp)
 {
-    struct var* p=(struct var*)malloc(sizeof(struct var*));
+    struct var *p = (struct var*)malloc(sizeof(struct var*));
     p=varhead->next;
     int flag=0;
     while(p!=NULL)
     {
-        if(!strcmp(p->name,temp->content))
+        if(strcmp(p->name,temp->content)==0)
         {
-            flag=1;    
+            flag=1; 
             return 1;
         }
         p=p->next;
@@ -164,7 +167,7 @@ typevar(struct ast* temp)
     p=varhead->next;
     while(p!=NULL)
     {
-        if(!strcmp(p->name,temp->content))
+        if(strcmp(p->name,temp->content)==0)
             return p->type;
         p=p->next;
     }
@@ -186,7 +189,7 @@ newfunc(int num,...)
             break;
         case 2://记录函数名
             temp=va_arg(valist, struct ast*);//取变长参数列表中的第1个结点
-            functail->name=temp->content;
+            functail->name = temp->content;
             break;
         case 3://记录实际返回值
             temp=va_arg(valist, struct ast*);//取变长参数列表中的第1个结点
@@ -194,10 +197,11 @@ newfunc(int num,...)
             break;
         default://记录函数类型,返回类型不匹配则报出错误
             rpnum=0;//将实参个数清0
-            temp=va_arg(valist, struct ast*);//取变长参数列表中的第1个结点
-            if(functail->rtype!=NULL)//实际返回类型和函数定义的返回类型比较
+            temp=va_arg(valist, struct ast*);//取变长参数列表中的第1个结点，即函数定义的返回类型
+            if(functail->rtype!=NULL)
             {
-                if(strcmp(temp->content,functail->rtype))// !=0 ??????
+                //实际返回类型和函数定义的返回类型比较
+                if(strcmp(temp->content,functail->rtype))
                     printf("Error type 8 at Line %d:Type mismatched for return.\n",yylineno);
             }
             functail->type=temp->type;
@@ -214,9 +218,10 @@ existfunc(struct ast* tp)
 {
     struct func* p=(struct func*)malloc(sizeof(struct func*));
     p=funchead->next;
+    
     while(p!=NULL&&p->name!=NULL&&p->tag==1)
     {
-        if(!strcmp(p->name,tp->content))
+        if(!strcmp(p->name,tp->content)) 
             return 1;
         p=p->next;
     }
@@ -237,22 +242,24 @@ typefunc(struct ast*tp)
     return 0;
 }
 // search the number of arguments
-int pnumfunc(struct ast*tp)
+int 
+pnumfunc(struct ast*tp)
 {
     struct func* p=(struct func*)malloc(sizeof(struct func*));
-    p=funchead->next;
-    while(p!=NULL)
+    p=funchead;
+    while(p->next!=NULL)
     {
+        p=p->next;
         if(!strcmp(p->name,tp->content))
             return p->pnum;
-        p=p->next;
     }
-    return 0;
+    return p->pnum;
 }
 
 /*------ST3: array------*/
 
-void newarray(int num,...)//1)创建数组符号表
+void 
+newarray(int num,...)//1)创建数组符号表
 {
     va_list valist; //定义变长参数列表
     struct array *a=(struct array*)malloc(sizeof(struct array));//新生成的父节点
@@ -264,30 +271,32 @@ void newarray(int num,...)//1)创建数组符号表
     a->name=temp->content;
     arraytail->next=a;
     arraytail=a;
+    printf("arraytail:%s\n", arraytail->name);
 }
 
-int  existarray(struct ast* tp)//2)查找数组是否已经定义,是返回1，否返回0
+int  
+existarray(struct ast* tp)//2)查找数组是否已经定义,是返回1，否返回0
 {
     struct array* p=(struct array*)malloc(sizeof(struct array*));
     p=arrayhead->next;
     int flag=0;
     while(p!=NULL)
     {
-        if(!strcmp(p->name,tp->content))
+        if(strcmp(p->name,tp->content)==0)
         {
             flag=1;    //存在返回1
+            printf("flag:%d\n", flag);
             return 1;
         }
         p=p->next;
     }
     if(!flag)
-    {
         return 0;//不存在返回0
-    }
     return 0;
 }
 
-char* typearray(struct ast* tp)//3)查找数组类型
+char* 
+typearray(struct ast* tp)//3)查找数组类型
 {
     struct array* p=(struct array*)malloc(sizeof(struct array*));
     p=arrayhead->next;
@@ -299,9 +308,12 @@ char* typearray(struct ast* tp)//3)查找数组类型
     }
     return 0;
 }
+
 /*====(4)结构体符号表的建立和查询================*/
-void newstruc(int num,...)//1)创建结构体符号表
+void 
+newstruc(int num,...)//1)创建结构体符号表
 {
+    printf("NOW ------ newstruc\n");
     va_list valist; //定义变长参数列表
     struct struc *a=(struct struc*)malloc(sizeof(struct struc));//新生成的父节点
     struct ast *temp=(struct ast*)malloc(sizeof(struct ast));
@@ -310,30 +322,35 @@ void newstruc(int num,...)//1)创建结构体符号表
     a->name=temp->content;
     structail->next=a;
     structail=a;
+    printf("structail->name:%s\n", structail->name);
 }
 
-int  existstruc(struct ast* tp)//2)查找结构体是否已经定义,是返回1，否返回0
+int  
+existstruc(struct ast* tp)//2)查找结构体是否已经定义,是返回1，否返回0
 {
+    printf("existstruc:%s\n",tp->content);
     struct struc* p=(struct struc*)malloc(sizeof(struct struc*));
     p=struchead->next;
-    int flag=0;
     while(p!=NULL)
     {
-        if(!strcmp(p->name,tp->content))
+        if(strcmp(p->name,tp->content)==0)
         {
-            flag=1;    //存在返回1
+            printf("flag:%d\n",1);
             return 1;
         }
         p=p->next;
     }
-    if(!flag)
-    {
-        return 0;//不存在返回0
-    }
     return 0;
 }
 
-void yyerror(char*s,...) //变长参数错误处理函数
+int ifprvalue(struct ast* tp) {
+    printf("ifprvalue: %s\n", tp->content);
+    return 1;
+}
+
+
+void 
+yyerror(char*s,...) //变长参数错误处理函数
 {
     va_list ap;
     va_start(ap,s);
@@ -342,20 +359,26 @@ void yyerror(char*s,...) //变长参数错误处理函数
     fprintf(stderr,"\n");
 }
 
+
 int main()
 {
     varhead=(struct var*)malloc(sizeof(struct var));//变量符号表头指针
     vartail=varhead;//变量符号表尾指针
+    vartail->next = NULL;
 
     funchead=(struct func*)malloc(sizeof(struct func));//函数符号表头指针
     functail=(struct func*)malloc(sizeof(struct func));//函数符号表头指针
     funchead->next=functail;//函数符号表尾指针
-    functail->pnum=0;
+    functail->next = NULL;
+    functail->pnum = 0;
+
     arrayhead=(struct array*)malloc(sizeof(struct array));//数组符号表头指针
     arraytail=arrayhead;
+    arraytail->next = NULL;
 
     struchead=(struct struc*)malloc(sizeof(struct struc));//结构体符号表头指针
     structail=struchead;//结构体符号表尾指针
+    structail->next = NULL;
 
     return yyparse(); //启动文法分析，调用词法分析
 }

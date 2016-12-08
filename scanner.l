@@ -1,7 +1,7 @@
 %option noyywrap yylineno
 %{
 #include "ast.h"
-#include "parser.tab.h" /* for token definitions and yylval */
+#include "tree.tab.h" /* for token definitions and yylval */
 %}
 
 TYPE int|float
@@ -38,7 +38,7 @@ RC \}
 
 AERROR .
 %%
-int|float {yylval.a=newast("TYPE",0,yylineno);return TYPE;}
+int|float {yylval.a=newast("TYPE",0,yylineno);printf("%d\n",TYPE);return TYPE;}
 struct {yylval.a=newast("STRUCT",0,yylineno);return STRUCT;}
 {RETURN} {yylval.a=newast("RETURN",0,yylineno); return RETURN;}
 {IF} { yylval.a=newast("IF",0,yylineno);return IF;}
@@ -46,16 +46,16 @@ struct {yylval.a=newast("STRUCT",0,yylineno);return STRUCT;}
 {WHILE} {yylval.a=newast("WHILE",0,yylineno); return WHILE;}
 {PLUS} {yylval.a=newast("PLUS",0,yylineno); return PLUS;}
 {MINUS} {yylval.a=newast("MINUS",0,yylineno); return MINUS;}
-{INTEGER} {yylval.a=newast("INTEGER",0,yylineno); return INTEGER;}
+{INTEGER} {yylval.a=newast("INTEGER",0,yylineno); printf("%d\n",INTEGER); return INTEGER;}
 {FLOAT} {yylval.a=newast("FLOAT",0,yylineno); return INTEGER;}
-{OCT} {yylval.a=newast("OCT",0,yylineno); return OCT;}
-{HEX} {yylval.a=newast("HEX",0,yylineno); return HEX;}
-{ID} {yylval.a=newast("ID",0,yylineno); return ID;}
+{OCT} {yylval.a=newast("OCT",0,yylineno); return INTEGER;}
+{HEX} {yylval.a=newast("HEX",0,yylineno); return INTEGER;}
+{ID} {yylval.a=newast("ID",0,yylineno); printf("%d\n",ID);return ID;}
 {SPACE} {}
 {EOL} {}
-{SEMI} {yylval.a=newast("SEMI",0,yylineno); return SEMI;}
+{SEMI} {yylval.a=newast("SEMI",0,yylineno); printf("%d\n",SEMI); return SEMI;}
 {COMMA} {yylval.a=newast("COMMA",0,yylineno); return COMMA;}
-{ASSIGNOP} {yylval.a=newast("ASSIGNOP",0,yylineno); return ASSIGNOP;}
+{ASSIGNOP} {yylval.a=newast("ASSIGNOP",0,yylineno); printf("%d\n",ASSIGNOP);return ASSIGNOP;}
 {RELOP} {yylval.a=newast("RELOP",0,yylineno); return RELOP;}
 {STAR} {yylval.a=newast("STAR",0,yylineno); return STAR;}
 {DIV} {yylval.a=newast("DIV",0,yylineno); return DIV;}
@@ -63,12 +63,12 @@ struct {yylval.a=newast("STRUCT",0,yylineno);return STRUCT;}
 {OR} {yylval.a=newast("OR",0,yylineno); return OR;}
 {DOT} {yylval.a=newast("DOT",0,yylineno); return DOT;}
 {NOT} {yylval.a=newast("NOT",0,yylineno); return NOT;}
-{LP} {yylval.a=newast("LP",0,yylineno); return LP;}
-{RP} {yylval.a=newast("RP",0,yylineno); return RP;}
-{LB} {yylval.a=newast("LB",0,yylineno); return LB;}
-{RB} {yylval.a=newast("RB",0,yylineno); return RB;}
-{LC} {yylval.a=newast("LC",0,yylineno); return LC;}
-{RC} {yylval.a=newast("RC",0,yylineno); return RC;}
+{LP} {yylval.a=newast("LP",0,yylineno); printf("(\n");return LP;}
+{RP} {yylval.a=newast("RP",0,yylineno); printf(")\n");return RP;}
+{LB} {yylval.a=newast("LB",0,yylineno); printf("[\n");return LB;}
+{RB} {yylval.a=newast("RB",0,yylineno); printf("]\n");return RB;}
+{LC} {yylval.a=newast("LC",0,yylineno); printf("{\n");return LC;}
+{RC} {yylval.a=newast("RC",0,yylineno); printf("}\n");return RC;}
 \/\/[^\n]*  {}  /* line annotation */
 "/*"([^\*]|\*[^/])*"*/"  {}  /* block annotation */
 "/*"([^\*]|\*[^/])*$  {printf("line %d: error: undeterminated comment\n",yylineno);}
