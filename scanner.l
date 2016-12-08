@@ -1,7 +1,7 @@
 %option noyywrap yylineno
 %{
 #include "ast.h"
-#include "tree.tab.h" /* for token definitions and yylval */
+#include "parse.tab.h" 
 %}
 
 TYPE int|float
