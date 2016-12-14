@@ -99,8 +99,6 @@ FunDec:ID LP VarList RP {
         $$=newnode("FunDec",3,$1,$2,$3);
         $$->value = 0;
         $$->nodetag = 6;
-
-        printf("FunDec: %s\n", $1->content[0]);
     }  
     ;
 VarList:ParamDec COMMA VarList { 
@@ -117,8 +115,6 @@ ParamDec:Specifier VarDec {
 VarDec:ID {
         $$ = newnode("VarDec",1,$1); 
         $$->nodetag = 2;
-        
-        printf("VarDec:%s\n", $$->content[0]); 
     }
     |VarDec LB INTEGER RB {
         $$ = newnode("VarDec",4,$1,$2,$3,$4);
@@ -157,7 +153,7 @@ DecList:Dec {
     }
     |Dec COMMA DecList { $$=newnode("DecList",3,$1,$2,$3); }
 	;
-Dec:VarDec { printf("Dec - VarDec:%s\n", $1->content[0]); $$=newnode("Dec",1,$1); }
+Dec:VarDec { $$=newnode("Dec",1,$1); }
 	|VarDec ASSIGNOP Exp { 
         $$=newnode("Dec",3,$1,$2,$3); 
         $$->value = $3->value; 
@@ -237,15 +233,11 @@ Exp:Exp ASSIGNOP Exp {
         $$->nodetag = 2;
     	if(!havedefined($1)) 
     	   printf("Error type 1 at Line %d:Undefined variable %s\n ",yylineno,$1->content[0]);
-
-        printf("ID:%s\n", $1->content[0]);
 	}
     |INTEGER {
         $$=newnode("Exp",1,$1);
         $$->value=$1->value;
         $$->nodetag = 0;
-
-        printf("EXP - INTEGER:%s\n", $1->content[0]);
     } 
     |FLOAT {
         $$=newnode("Exp",1,$1);
