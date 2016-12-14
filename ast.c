@@ -19,6 +19,8 @@ struct ast *newast(char*  name,int num,...)//抽象语法树建立
     if(num>0)//num>0为非终结符：变长参数均为语法树结点，孩子兄弟表示法
     {
         temp=va_arg(valist, struct ast*);//取变长参数列表中的第一个结点设为a的左孩子
+        printf("first parameter:line - %d,content - %s,tag - %d\n", temp->line, temp->content, temp->tag);
+
         a->l=temp;
         a->line=temp->line;//父节点a的行号等于左孩子的行号
         if(num==1)//只有一个孩子

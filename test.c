@@ -1,15 +1,3 @@
-
-struct A
-{
-	int x;	
-	int x;	
-};
-
-struct A
-{
-	int x;
-};
-
 int main() {
 	int i = 0;
 	int k = i.x ;
