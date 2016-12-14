@@ -19,12 +19,10 @@ newnode(char*  gramname,int num,...)
     {
         temp = va_arg(valist, struct astnode*); // 取变长参数列表中的第一个结点，设为a的左孩子
         a->l = temp;
-        a->nodeline = temp->nodeline; // 传递行号
-        //if(num == 1) // 对于右边只有一个符号的产生式，直接向左传递语义值、nodetag值
-        //{
-            a->content[0] = temp->content[0]; 
-            a->nodetag = temp->nodetag;
-        //}
+        a->nodeline = temp->nodeline; // 传递行号       
+        a->content[0] = temp->content[0]; 
+        a->nodetag = temp->nodetag;
+
         if(num != 1) // 取变长参数列表中的剩余结点，依次设置成右指针，为兄弟结点
         {
             for(int i=0; i<num-1; ++i)
@@ -33,7 +31,6 @@ newnode(char*  gramname,int num,...)
                 temp = temp->r;
             }
         }
-        printf("newnode:%s,%s\n", a->gramname, a->content[0]);
     }
     else // num==0表示空的语法单元/终结符
     {

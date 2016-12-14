@@ -46,9 +46,6 @@ ExtDefList:ExtDef ExtDefList { $$=newnode("ExtDefList",2,$1,$2); }
     ;
 ExtDef:Specifier ExtDecList SEMI {
 		$$=newnode("ExtDef",3,$1,$2,$3);
-		//if(havedefined($2)) // 3 - 检查变量是否重复定义
-	    //    printf("Error type 3 at Line %d:Rehavedefined Variable '%s'\n",yylineno,$2->content);
-	    //else 
 	    newsymbol($1,$2); 
 	}
     |Specifier SEMI { //这表示只有结构体声明时
@@ -62,7 +59,6 @@ ExtDef:Specifier ExtDecList SEMI {
 ExtDecList:Dec {$$=newnode("ExtDecList",1,$1);$$->value = $1->value;}
     |Dec COMMA ExtDecList {
         $$=newnode("ExtDecList",3,$1,$2,$3);
-        //$$->content.c = strcat($$->content.c,$3->content.c);
     }
     ;
 /*Specifier*/
@@ -76,12 +72,8 @@ StructSpecifier:STRUCT OptTag LC DefList RC {
 		$$=newnode("StructSpecifier",5,$1,$2,$3,$4,$5);
         $$->content[0] = $2->content[0];
         $$->nodetag = 5;
-	    //if(existstruc($2))   
-	      //  printf("Error type 16 at Line %d:Duplicated structure name '%s'\n",yylineno,$2->content);
-	    //else newstruc(1,$2);
         $2->nodetag = 4;
         newsymbol($1,$2);
-        //storeinner(1,$4);
 	}
     |STRUCT Tag {
 	    $$=newnode("StructSpecifier",2,$1,$2);
@@ -101,11 +93,6 @@ FunDec:ID LP VarList RP {
         $$=newnode("FunDec",4,$1,$2,$3,$4); 
         $$->value = $3->value; // 形参个数
         $$->nodetag = 6;
-
-    //if(existfunc($1)) // 4 - 函数重复定义 
-      //  printf("Error type 4 at Line %d:Rehavedefined Function '%s'\n",yylineno,$1->content);
-    //else
-        //newsymbol(2,$1);
     }
     |ID LP RP 
     {
@@ -114,11 +101,6 @@ FunDec:ID LP VarList RP {
         $$->nodetag = 6;
 
         printf("FunDec: %s\n", $1->content[0]);
-
-      //if(existfunc($1)) // 4 - 函数重复定义
-      //  printf("Error type 4 at Line %d:Rehavedefined Function '%s'\n",yylineno,$1->content);
-      //else
-        //newsymbol(2,$1);
     }  
     ;
 VarList:ParamDec COMMA VarList { 
@@ -136,12 +118,11 @@ VarDec:ID {
         $$ = newnode("VarDec",1,$1); 
         $$->nodetag = 2;
         
-        printf("VarDec:%s\n", $$->content[0]); // VarDec:i
+        printf("VarDec:%s\n", $$->content[0]); 
     }
     |VarDec LB INTEGER RB {
         $$ = newnode("VarDec",4,$1,$2,$3,$4);
         $$->nodetag = 3;
-        //storeinner(2,$3);
     }
     ;
 /*Statement*/
@@ -167,20 +148,12 @@ DefList:Def DefList{ $$=newnode("DefList",2,$1,$2); }
 Def:Specifier DecList SEMI 
 	{
         $$=newnode("Def",3,$1,$2,$3);
-        //if(existvar($2)||existarray($2)) // 3 - 检查变量是否重复定义
-        //	printf("Error type 3 at Line %d:Rehavedefined Variable '%s'\n",yylineno,$2->content);
-    	//else if($2->tag==4) newarray(2,$1,$2);
-    	//else  
-        printf("Def - newsymbol:%s\n", $$->content[0]);
         newsymbol($1,$2); 
     }
     ;
 DecList:Dec { 
         $$=newnode("DecList",1,$1); 
         $$->value = $1->value;
-
-        printf("Dec:%s\n", $1->content[0]);
-
     }
     |Dec COMMA DecList { $$=newnode("DecList",3,$1,$2,$3); }
 	;
@@ -188,8 +161,6 @@ Dec:VarDec { printf("Dec - VarDec:%s\n", $1->content[0]); $$=newnode("Dec",1,$1)
 	|VarDec ASSIGNOP Exp { 
         $$=newnode("Dec",3,$1,$2,$3); 
         $$->value = $3->value; 
-
-        printf("VarDec ASSIGNOP Exp:%s, %s, %s\n", $1->content[0], $2->content[0], $3->content[0]);
     }
     ;
 /*Expressions*/
