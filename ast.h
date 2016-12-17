@@ -3,9 +3,10 @@
 #include <stdio.h> 
 #include <stdlib.h>
 #include <math.h>
-#include <stdarg.h>//变长参数函数所需的头文件
-//#include <exception> 
+#include <stdarg.h>
+#include <stdbool.h>
 
+#define MAXNUM 100
 
 extern int yylineno;
 extern char* yytext;
@@ -14,100 +15,79 @@ extern int yylex();
 extern void yyerror(char*s,...);
 
 
-/*抽象语法树的结点*/
-struct ast
+struct names // 表示同一类型的变量，如 int i,j,k[9];
 {
-    int line; //行号
-    char* name;//语法单元的名字
-    int tag;//1为变量，2为函数，3为常数,4为数组，5为结构体
-    struct ast *l;//左孩子
-    struct ast *r;//右孩子
-    char* content;//语法单元语义值(int i;i是一个ID，ID的content是‘i’)
-    char* type;//语法单元数据类型:主要用于等号和操作符左右类型匹配判断
-    float value;//常数值(记录integer和float的数据值)
+	char* name;
+	int tag; // 1-普通变量，2-数组变量，4-结构体对象
+	struct names* next;
 };
 
-/*变量符号表的结点*/
-struct var
+struct para // 记录结构体域内成员/函数形参
 {
-    char* name;//变量名
-    char* type;//变量类型
-    struct var *next;//指针
-}*varhead,*vartail;
+    char* type;
+    struct names* namelist;
+    int tag; // 1-普通变量，2-数组变量，4-结构体对象
+    struct para* next;
+};
 
-/*函数符号表的结点*/
-struct func
+// 语法树
+struct astnode
 {
-    int tag;//0表示未定义，1表示定义
-    char* name;//函数名
-    char* type;//函数类型
-    char* rtype;//实际返回值类型
-    int pnum;//形参数个数
-    struct func *next;
-}*funchead,*functail;
-int rpnum;//记录函数实参个数
+    int nodeline; // 行号
+    char* gramname; // 语法单元的名字
+    int nodetag; // 0为常数/纯右值，1为普通变量，2为数组，3为结构体对象，4为结构体，5为函数
+    union {
+    	char* c;
+    	float f;
+    } content; // 语法单元语义值
+    char* type; // int/float: 用于类型匹配判断
 
-/*数组符号表的结点*/
-struct array
+    struct names* decnamelist; // 记录DecList, ExtDecList中的多个同类的变量
+    struct astnode* l;
+    struct astnode* r;
+};
+struct names *adddeclist(struct astnode* declist);
+
+
+struct astnode *newnode(char* name,int num,...);
+void eval(struct astnode*,int level);
+void freeast(struct astnode* current);
+int paranum; // 记录函数形参个数
+int rpnum; // 记录函数实参个数
+int CurrentLevel; // 记录当前作用域
+char* rtype; // 记录当前函数实际返回值类型
+int dim[MAXNUM];
+int dimcount;
+
+
+// 符号表
+struct symbol
 {
-    char* name;//数组名
-    char* type;//数组类型
-    struct array *next;
-}*arrayhead,*arraytail;
+    int line; // 行号
+    int tag; // 1为普通变量，2为数组，3为结构体对象，4为结构体，5为函数
+    int level; // 所在可见域
+    char* name; // 符号名
+    char* type; // int/float
+    struct symbol* next; 
 
-/*结构体符号表的结点*/
-struct struc
-{
-    char* name;//结构体名
-    char* type;//数组类型
-    struct struc *next;
-}*struchead,*structail;
+    union { 
+		struct para* paralist; // 记录结构体域内成员/函数形参        
+		int dimension[MAXNUM]; // 记录数组的每维大小
+    } info;
+    int pnum; // 函数形参数个数
 
-/*=====抽象语法树========================*/
-/*构造抽象语法树,变长参数，name:语法单元名字；num:变长参数中语法结点个数*/
-struct ast *newast(char* name,int num,...);
+}*tablehead; // 头指针的结构体里仅有一个next指针。
+struct para *addparalist(struct astnode* varlist);
 
-/*遍历抽象语法树，level为树的层数*/
-void eval(struct ast*,int level);
+bool havedefined(char* name); // 检测当前块内是否能定义（块内无同名变量）
+void newsymbol(struct astnode* type, struct astnode* name);
+void freetable();
 
-/*=====变量符号表========================*/
-/*建立变量符号表*/
-void newvar(int num,...);
+int getdefined(struct astnode* current); // 返回tag值，若无定义则返回0
+void visitstruct(struct astnode* exp, struct astnode* id);
 
-/*查找变量是否已经定义,是返回1，否返回0*/
-int existvar(struct ast*tp);
-
-/*查找变量类型*/
-char* typevar(struct ast*tp);
-
-/*=================函数符号表==============*/
-/*建立函数符号表,flag：1表示变量符号表，2表示函数符号表,num是参数个数*/
-void newfunc(int num,...);
-
-/*查找函数是否已经定义,是返回1，否返回0*/
-int existfunc(struct ast*tp);
-
-/*查找函数类型*/
-char* typefunc(struct ast*tp);
-
-/*查找函数的形参个数*/
-int pnumfunc(struct ast*tp);
-
-/*=================数组符号表==============*/
-/*建立数组符号表*/
-void newarray(int num,...);
-
-/*查找数组是否已经定义,是返回1，否返回0*/
-int existarray(struct ast*tp);
-
-/*查找数组类型*/
-char* typearray(struct ast*tp);
-
-/*=================结构体符号表==============*/
-/*建立结构体符号表*/
-void newstruc(int num,...);
-
-/*查找结构体是否已经定义,是返回1，否返回0*/
-int existstruc(struct ast*tp);
-
-int ifprvalue(struct ast* tp);
+int getpnum(struct astnode* current);
+int rpnum; // 记录实参个数
+int CurrentLevel; // 记录当前层。遇‘{’加1，遇‘}’减1.
+void quitblock(); // 用于删除块内定义的变量
+void checkreturn(struct astnode* current);

@@ -1,3 +1,4 @@
-int main() {
-	int i = 0;
+int A()
+{
+	int i,j,k[9][8];
 }
