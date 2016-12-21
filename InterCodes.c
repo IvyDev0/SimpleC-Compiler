@@ -19,7 +19,6 @@ char* new_temp()
 	++tempcount;
     char c[20], *tmp;
     sprintf(c, "%d", tempcount);
-    //printf("%s\n",c);
     tmp = combine_strings("t",c);
     return tmp;
 }
@@ -28,15 +27,12 @@ char* new_label()
 	++labelcount;
     char c[20], *label;
     sprintf(c, "%d", labelcount);
-    //printf("%s\n",c);
     label = combine_strings("label",c);
     return label;
 }
 
 void trans_exp(struct astnode* exp, char* place)
 {
-	//printf("trans_exp : exp --------- : %s\n", exp->l->gramname);
-
 	if(!strcmp(exp->l->gramname,"INTEGER") || !strcmp(exp->l->gramname,"FLOAT"))
 		printf("%s := #%0.0f\n", place, exp->l->content.f); 
 	else if(!strcmp(exp->l->gramname,"ID") && exp->l->r==NULL) 
@@ -46,7 +42,6 @@ void trans_exp(struct astnode* exp, char* place)
 		char* varname = exp->l->l->content.c;
 		char* tmp = new_temp();
 		trans_exp(exp->l->r->r, tmp);
-		//printf("%s := %s\n %s := %s\n", varname, tmp, place, varname);
 		printf("%s := %s\n", varname, tmp);
 	}
 	else if(exp->l->r && !strcmp(exp->l->r->gramname,"PLUS"))
@@ -85,21 +80,16 @@ void trans_exp(struct astnode* exp, char* place)
 		char* label2 = new_label();
 		printf("%s := #0\n", place);
 		trans_cond(exp, label1, label2);
-		printf("LABEL %s\n %s := #1\n LABEL %s", label1, place, label2);
+		printf("LABEL %s:\n%s := #1\nLABEL %s:\n", label1, place, label2);
 	}
 	
 	if(exp->l->r && !strcmp(exp->l->r->gramname,"LP"))
 	{
-		//printf("------------ID LP------------:%s\n", exp->l->r->r->gramname);
 
 		if(!strcmp(exp->l->r->r->gramname,"Args"))
 		{
-			//printf("------------Args------------\n");
 
 			char* function = exp->l->content.c;
-			
-			//printf("------------function:%s\n", function);
-
     		struct arglist* arg_head = (struct arglist*)malloc(sizeof(struct arglist));
     		arg_head->next = NULL;
 
@@ -122,8 +112,6 @@ void trans_exp(struct astnode* exp, char* place)
 		}
 		else
 		{
-			//printf("------------trans_exp------------\n");
-
 			char* function = exp->l->content.c;
 			if(!strcmp(function,"read"))
 				printf("READ %s\n", place);
@@ -134,8 +122,6 @@ void trans_exp(struct astnode* exp, char* place)
 }
 void trans_args(struct astnode* args, struct arglist* arg_head)
 {
-	//printf("trans_args : args --------- : %s\n", args->l->gramname);
-
 	if(args->l->r && !strcmp(args->l->r->gramname,"COMMA")) // Args -> Exp COMMA Args1
 	{
 		char* tmp = new_temp();
@@ -148,8 +134,6 @@ void trans_args(struct astnode* args, struct arglist* arg_head)
 	}
 	else // Args -> Exp
 	{
-		//printf("------------Args -> Exp------------\n");
-
 		char* tmp = new_temp();
 		trans_exp(args->l, tmp);
 		struct arglist* newarg = (struct arglist*)malloc(sizeof(struct arglist));
@@ -177,14 +161,14 @@ void trans_cond(struct astnode* exp, char* labeltrue, char* labelfalse)
 	{
 		char* label = new_label();
 		trans_cond(exp->l, label, labelfalse);
-		printf("LABEL %s\n", label);
+		printf("LABEL %s:\n", label);
 		trans_cond(exp->l->r->r, labeltrue, labelfalse);
 	}
 	else if(!strcmp(exp->l->r->gramname,"OR"))
 	{
 		char* label = new_label();
 		trans_cond(exp->l->r->r, labeltrue, label);
-		printf("LABEL %s\n", label);
+		printf("LABEL %s:\n", label);
 		trans_cond(exp->l, labeltrue, labelfalse);
 	}
 	else
@@ -196,8 +180,6 @@ void trans_cond(struct astnode* exp, char* labeltrue, char* labelfalse)
 }
 void trans_stmt(struct astnode* stmt)
 {
-	//printf("trans_stmt : stmt --------- : %s\n", stmt->l->gramname);
-
 	if(!strcmp(stmt->l->gramname,"Exp"))
 		trans_exp(stmt->l, NULL);
 	else if(!strcmp(stmt->l->gramname,"CompSt"))
@@ -216,20 +198,20 @@ void trans_stmt(struct astnode* stmt)
 			char* label2 = new_label();
 			char* label3 = new_label();
 			trans_cond(stmt->l->r->r, label1, label2);
-			printf("LABEL %s\n", label1);
+			printf("LABEL %s:\n", label1);
 			trans_stmt(stmt->l->r->r->r->r);
-			printf("GOTO %s\nLABEL %s\n", label3, label2);
+			printf("GOTO %s\nLABEL %s:\n", label3, label2);
 			trans_stmt(stmt->l->r->r->r->r->r->r);
-			printf("LABEL %s\n", label3);
+			printf("LABEL %s:\n", label3);
 		}
 		else
 		{
 			char* label1 = new_label();
 			char* label2 = new_label();
 			trans_cond(stmt->l->r->r, label1, label2);
-			printf("LABEL %s\n", label1);
+			printf("LABEL %s:\n", label1);
 			trans_stmt(stmt->l->r->r->r->r);
-			printf("LABEL %s\n", label2);
+			printf("LABEL %s:\n", label2);
 		}
 	}
 	else if(!strcmp(stmt->l->gramname,"WHILE"))
@@ -237,18 +219,16 @@ void trans_stmt(struct astnode* stmt)
 		char* label1 = new_label();
 		char* label2 = new_label();
 		char* label3 = new_label();
-		printf("LABEL %s\n", label1);
+		printf("LABEL %s:\n", label1);
 		trans_cond(stmt->l->r->r, label2, label3);
-		printf("LABEL %s\n", label2);
+		printf("LABEL %s:\n", label2);
 		trans_stmt(stmt->l->r->r->r->r);
-		printf("GOTO %s\nLABEL %s\n", label1, label3);
+		printf("GOTO %s\nLABEL %s:\n", label1, label3);
 	}
 }
 
 void trans(struct astnode *current)
 {
-	//printf("trans : current --------- : %s\n", current->gramname);
-
 	if(!strcmp(current->gramname,"FunDec")) 
     {
 		printf("FUNCTION %s:\n",current->l->content.c);
@@ -264,20 +244,29 @@ void trans(struct astnode *current)
 			}	
 			printf("\n");
 		}
-		trans(current->l);			
-		trans(current->r);
+		if(current->l)
+			trans(current->l);
+		if(current->r)
+			trans(current->r);
 	}
 	else if(!strcmp(current->gramname,"Stmt"))
 	{
 		trans_stmt(current);
-		trans(current->r);
+		if(current->l)
+			trans(current->l);
+		if(current->r)
+			trans(current->r);
 	}
 	else if(!strcmp(current->gramname,"Exp"))
 	{
 		char* tmp = new_temp();
 		trans_exp(current, tmp);
+		if(current->l)
+			trans(current->l);
+		if(current->r)
+			trans(current->r);
 	}
-	// Dec -> VarDec, 当VarDec是数组或结构体时，开辟空间语句
+	// Dec -> VarDec, 当VarDec是数组或结构体时， 
 	else if(!strcmp(current->gramname,"Dec") && (current->l->r==NULL))
 	{
 		if(!strcmp(current->l->l->gramname,"VarDec"))
@@ -290,7 +279,7 @@ void trans(struct astnode *current)
 		trans_exp(current->r->r, tmp1);
 		if(!strcmp(current->l->gramname,"ID"))
         	printf("%s := %s\n",current->l->content.c, tmp1);
-        else // VarDec -> VarDec LB INTEGER RB, 是数组
+        else // VarDec -> VarDec LB INTEGER RB
         	trans_vardecArray(current->l);       	
 	}
 	else

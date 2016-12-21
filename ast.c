@@ -99,7 +99,7 @@ struct astnode *newnode(char*  gramname,int num,...)//抽象语法树建立
             a->content.c = s;
         }
     }
-    printf("newnode:  %s\n", a->gramname);
+    printf("newnode:  %d, %s\n", a->nodeline, a->gramname);
     return a;
 }
 

@@ -45,11 +45,6 @@ struct astnode
     struct names* decnamelist; // 记录DecList, ExtDecList中的多个同类的变量
     struct astnode* l;
     struct astnode* r;
-
-    // 为了中间代码生成增加的属性
-    //char* tpname;
-    //char* place;
-
 };
 struct names *adddeclist(struct astnode* declist);
 
