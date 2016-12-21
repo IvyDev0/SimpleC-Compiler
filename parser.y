@@ -1,5 +1,6 @@
 %{
-#include "ast.h"
+    //#include "ast.h"
+    #include "InterCodes.h"
 %}
 %union {
 struct astnode* a;
@@ -33,9 +34,11 @@ Program:ExtDefList {
         $$=newnode("Program",1,$1);
         printf("Print syntaxtree:\n");
         eval($$,0);
+        printf("Finish printing.\n\n");
+
+        trans($$);
         freeast($$);
         freetable();
-        printf("Finish printing.\n\n");
     }
     ;
 ExtDefList:ExtDef ExtDefList { $$=newnode("ExtDefList",2,$1,$2); }
@@ -94,17 +97,32 @@ Tag:ID {$$=newnode("Tag",1,$1);}
 VarDec:ID { $$=newnode("VarDec",1,$1); $$->nodetag = 1; }
     | VarDec LB INTEGER RB {$$=newnode("VarDec",4,$1,$2,$3,$4); $$->nodetag = 2; dim[dimcount] = (int)$3->content.f; ++dimcount; }
     ;
-FunDec:ID LP VarList RP { $$=newnode("FunDec",4,$1,$2,$3,$4); }
-    |ID LP RP { $$=newnode("FunDec",3,$1,$2,$3); $$->nodetag = 5; }
+FunDec:ID LP VarList RP { 
+        $$=newnode("FunDec",4,$1,$2,$3,$4); 
+        $1->nodetag = 6; 
+        addfunction($1);
+    }
+    |ID LP RP { 
+        $$=newnode("FunDec",3,$1,$2,$3); 
+        $$->nodetag = 5; 
+        $1->nodetag = 6; 
+        addfunction($1);
+    }
     ;
 VarList:ParamDec COMMA VarList {$$=newnode("VarList",3,$1,$2,$3); ++paranum; }
     |ParamDec {$$=newnode("VarList",1,$1); paranum = 1; }
     ;
 ParamDec:Specifier VarDec { 
-        $$=newnode("ParamDec",2,$1,$2); 
+        $$=newnode("ParamDec",2,$1,$2);
         $$->type = $1->type; 
         $$->nodetag = $2->nodetag; 
         $$->content = $2->content;
+        $2->decnamelist = (struct names*)malloc(sizeof(struct names));
+        $2->decnamelist->name = $2->content.c;
+        $2->decnamelist->tag = $2->nodetag;
+        paramark = 1;
+        newsymbol($1, $2);
+        paramark = 0;
     }
     ;
 /*Statement*/
@@ -117,9 +135,9 @@ Stmt:Exp SEMI {$$=newnode("Stmt",2,$1,$2);}
     |Compst {$$=newnode("Stmt",1,$1);}
     |RETURN Exp SEMI { 
         $$=newnode("Stmt",3,$1,$2,$3); 
-        checkreturn($2);
+        //checkreturn($2);
     }
-    |IF LP Exp RP Stmt {$$=newnode("Stmt",5,$1,$2,$3,$4,$5);}
+    |IF LP Exp RP Stmt %prec LOWER_THAN_ELSE {$$=newnode("Stmt",5,$1,$2,$3,$4,$5);}
     |IF LP Exp RP Stmt ELSE Stmt {$$=newnode("Stmt",7,$1,$2,$3,$4,$5,$6,$7);}
     |WHILE LP Exp RP Stmt {$$=newnode("Stmt",5,$1,$2,$3,$4,$5);}
     ;
@@ -205,22 +223,22 @@ Exp:Exp ASSIGNOP Exp {
         |MINUS Exp { $$=newnode("Exp",2,$1,$2); }
         |NOT Exp { $$=newnode("Exp",2,$1,$2); }
         |ID LP Args RP { 
-            $$=newnode("Exp",4,$1,$2,$3,$4);
-            if(getdefined($1) != 5) // Error type 2 检查函数是否未定义就调用 
-                printf("Error type 2 at Line %d: Undefined Function %s\n ",yylineno,$1->content.c);
-            else if(getpnum($2) != rpnum) // 9 - 函数调用时实参与形参的数目不匹配 
+            if(getdefined($1) != 5 && strcmp(currentfunction->name, $1->content.c)!=0 ) // Error type 2 检查函数是否未定义就调用 
+                printf("Error type 2 at Line %d: Undefined Function '%s'\n ",yylineno,$1->content.c);
+            else if( (getpnum($1)==-1 && currentfunction->pnum!=rpnum) && getpnum($1) != rpnum) // 9 - 函数调用时实参与形参的数目不匹配 
                 printf("Error type 9 at Line %d: Number of Parameters Mismatched\n ",yylineno);
             rpnum = 0;
+            $$=newnode("Exp",4,$1,$2,$3,$4);
         }
         |ID LP RP {
-            $$=newnode("Exp",3,$1,$2,$3);
-            if(getdefined($1) == 1) // 11- 对普通变量使用了函数调用的操作符 
+            if(getdefined($1) == 1 && strcmp(currentfunction->name, $1->content.c)!=0) // 11- 对普通变量使用了函数调用的操作符 
                 printf("Error type 11 at Line %d: Illegal call %s()\n ",yylineno,$1->content.c);
-            else if(getpnum($2) != 0) 
+            else if(  (getpnum($1)==-1 && currentfunction->pnum!=rpnum) && getpnum($1) != 0) 
                 printf("Error type 9 at Line %d: Number of Parameters Mismatched\n ",yylineno);
+            $$=newnode("Exp",3,$1,$2,$3);
         }
         |Exp LB Exp RB {
-            $$=newnode("Exp",4,$1,$2,$3,$4);
+            
             if(getdefined($1) == 0)
                 printf("Error type 1 at Line %d: Undefined Variable '%s'\n ",yylineno,$1->content.c);
             else if(getdefined($1) != 2) // Error type 10 对非数组类型使用了[]数组访问的操作符 
@@ -229,6 +247,7 @@ Exp:Exp ASSIGNOP Exp {
                 printf("Error type 12 at Line %d: %.1f is not a integer.\n",yylineno,$3->content.f);
             else 
                 $$->nodetag = 2;
+            $$=newnode("Exp",4,$1,$2,$3,$4);
         }
         |Exp DOT ID { 
             $$=newnode("Exp",3,$1,$2,$3);
@@ -239,9 +258,9 @@ Exp:Exp ASSIGNOP Exp {
             }
         }
         |ID { 
-            $$=newnode("Exp",1,$1); 
             if(getdefined($1) == 0)
                 printf("Error type 1 at Line %d: Undifined Variable %s\n", yylineno, $1->content.c);
+            $$=newnode("Exp",1,$1); 
         }
         |INTEGER { $$=newnode("Exp",1,$1); $$->nodetag = 0; }
         |FLOAT { $$=newnode("Exp",1,$1); $$->nodetag = 0; }

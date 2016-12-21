@@ -11,14 +11,16 @@ struct astnode *newnode(char*  gramname,int num,...)//抽象语法树建立
         yyerror("out of space");
         exit(0);
     }
-    a->gramname=gramname;
+    a->gramname = gramname;
+    a->decnamelist = NULL;
     va_start(valist,num); // 初始化变长参数为num后的参数
 
     if(num>0) // num>0为非终结符，左孩子右兄弟表示法
     {
         temp=va_arg(valist, struct astnode*); // 取变长参数列表中的第一个结点设为a的左孩子
 
-        a->l=temp;
+        a->l = temp;
+        a->r = NULL;
         // 左结点直接向父节点传递的值：行号、语义、nodetag、type
         a->nodeline = temp->nodeline;
         a->content = temp->content;
@@ -190,11 +192,15 @@ struct para *adddeflist(struct astnode* deflist) {
 
 // VarList:ParamDec COMMA VarList | ParamDec  记录函数所有形参
 struct para *addparalist(struct astnode* varlist) { 
+    
+
     struct para *paralist = (struct para*)malloc(sizeof(struct para));
     struct astnode *a = varlist;
     struct para *p = paralist;
 
     while(a->l->r) {
+        //printf("------------addparalist\n");
+
         p->type = a->l->type;
         p->namelist->name = a->l->content.c;
         p->namelist->next = NULL;
@@ -203,19 +209,21 @@ struct para *addparalist(struct astnode* varlist) {
         p->next = (struct para*)malloc(sizeof(struct para));
         p = p->next;
     }
+    //printf("------------addparalist\n");
+
     p->type = a->type;
+    p->namelist = (struct names*)malloc(sizeof(struct names));
     p->namelist->name = a->content.c;
     p->namelist->next = NULL;
     p->next = NULL;
-    
-
-    p = paralist;
-    while(p) {
-        printf("------ paralist: %s, %s\n", p->type, p->namelist->name);
-        p = p->next;
-    }
 
     return paralist;
+}
+void addfunction(struct astnode* funid)
+{
+    currentfunction->name = funid->content.c;
+    currentfunction->pnum = paranum;
+    printf("------addfunction: %s\n", currentfunction->name);
 }
 
 // 建立符号表
@@ -229,13 +237,16 @@ void newsymbol(struct astnode* type, struct astnode* arg)
     p->type = type->content.c; 
     p->line = arg->nodeline;
     p->tag = arg->nodetag;
+    //printf("ParamDec:Specifier VarDec - tag:%d\n", p->tag);
+
     p->name = arg->content.c;
     p->level = CurrentLevel;
 
     if(arg->nodetag == 5) {
-
-        if(!strcmp(arg->l->r->r->gramname,"RP")) 
+        //printf("ParamDec:Specifier VarDec ---- %s\n", arg->l->r->r->gramname);
+        if(!strcmp(arg->l->r->r->gramname,"RP")){
             p->info.paralist = NULL;
+        }
         else
             p->info.paralist = addparalist(arg->l->r->r);
         if(havedefined(p->name)) 
@@ -246,6 +257,9 @@ void newsymbol(struct astnode* type, struct astnode* arg)
         // 插在表头
         p->next = tablehead->next;
         tablehead->next = p;
+        // 清空 currentfunction
+        currentfunction->name = "";
+        currentfunction->pnum = 0;
 
         printf("newsymbol: %s, tag:%d, type: %s, CurrentLevel: %d\n", tablehead->next->name, tablehead->next->tag, tablehead->next->type, CurrentLevel);
 
@@ -269,7 +283,10 @@ void newsymbol(struct astnode* type, struct astnode* arg)
             struct symbol *p = (struct symbol*)malloc(sizeof(struct symbol));
             p->type = type->content.c; 
             p->line = arg->nodeline;
-            p->level = CurrentLevel;
+            if(paramark == 1)
+                p->level = CurrentLevel+1;
+            else
+                p->level = CurrentLevel;            
 
             p->tag = namelist->tag;
             p->name = namelist->name;
@@ -299,6 +316,7 @@ void newsymbol(struct astnode* type, struct astnode* arg)
 
 // 检测当前块内是否已定义同名变量
 bool havedefined(char* name) {
+    //printf("------havedefined------------\n");
     struct symbol* p = tablehead->next;
     while(p!=NULL && p->level==CurrentLevel)
     {
@@ -326,8 +344,6 @@ quitblock() {
     tablehead->next = p;
     --CurrentLevel;
     printf("quitblock: CurrentLevel: %d\n", CurrentLevel);
-    //if(p)
-        //printf("----current tablehead: %s\n", p->name);
 }
 
 
@@ -335,6 +351,7 @@ quitblock() {
 int 
 getdefined(struct astnode* current) {
     struct symbol* p = tablehead->next;
+    //printf("tablehead------:%s, %s\n", tablehead->next->name, current->content.c);
     while(p!=NULL)
     {
         if(!strcmp(p->name,current->content.c)) 
@@ -410,7 +427,7 @@ freetable() {
         p = tp;
     }
     free(tablehead);
-    printf("Symbol table cleaned.\n\n");
+    printf("\nSymbol table cleaned.\n\n");
 }
 
 void 
@@ -436,12 +453,37 @@ yyerror(char*s,...) //变长参数错误处理函数
 
 int main()
 {
-    tablehead=(struct symbol*)malloc(sizeof(struct symbol));
-    tablehead->next = NULL;    
+    tablehead = (struct symbol*)malloc(sizeof(struct symbol));
+    currentfunction = (struct symbol*)malloc(sizeof(struct symbol));
+
+    //tablehead->next = NULL;    
     rpnum = 0;
     paranum = 0;
     CurrentLevel = 0;
     dimcount = 0;
+    tempcount = 0;
+    labelcount = 0;
+    paramark = 0;
+    // 在符号表中预先添加read和write
+    struct symbol* read = (struct symbol*)malloc(sizeof(struct symbol));
+    struct symbol* write = (struct symbol*)malloc(sizeof(struct symbol));
+    read->name = "read";
+    read->tag = 5;
+    read->pnum = 0;
+    read->info.paralist = NULL;
+    read->type = "int";
+    read->level = 0;
+    write->name = "write";
+    write->tag = 5;
+    write->pnum = 1; 
+    write->info.paralist = (struct para*)malloc(sizeof(struct para));
+    write->info.paralist->type = "int";
+    write->type = "int";
+    write->level = 0;
+
+    tablehead->next = read;
+    read->next = write;
+    write->next = NULL;    
 
     return yyparse(); //启动文法分析，调用词法分析
 }

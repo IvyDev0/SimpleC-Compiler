@@ -45,9 +45,13 @@ struct astnode
     struct names* decnamelist; // 记录DecList, ExtDecList中的多个同类的变量
     struct astnode* l;
     struct astnode* r;
+
+    // 为了中间代码生成增加的属性
+    //char* tpname;
+    //char* place;
+
 };
 struct names *adddeclist(struct astnode* declist);
-
 
 struct astnode *newnode(char* name,int num,...);
 void eval(struct astnode*,int level);
@@ -58,6 +62,8 @@ int CurrentLevel; // 记录当前作用域
 char* rtype; // 记录当前函数实际返回值类型
 int dim[MAXNUM];
 int dimcount;
+
+int tempcount, labelcount; 
 
 
 // 符号表
@@ -76,8 +82,9 @@ struct symbol
     } info;
     int pnum; // 函数形参数个数
 
-}*tablehead; // 头指针的结构体里仅有一个next指针。
-struct para *addparalist(struct astnode* varlist);
+}*tablehead, *currentfunction; // 头指针的结构体里仅有一个next指针。
+struct para* addparalist(struct astnode* varlist);
+void addfunction(struct astnode* funid);
 
 bool havedefined(char* name); // 检测当前块内是否能定义（块内无同名变量）
 void newsymbol(struct astnode* type, struct astnode* name);
@@ -87,6 +94,7 @@ int getdefined(struct astnode* current); // 返回tag值，若无定义则返回
 void visitstruct(struct astnode* exp, struct astnode* id);
 
 int getpnum(struct astnode* current);
+int paramark;
 int rpnum; // 记录实参个数
 int CurrentLevel; // 记录当前层。遇‘{’加1，遇‘}’减1.
 void quitblock(); // 用于删除块内定义的变量
