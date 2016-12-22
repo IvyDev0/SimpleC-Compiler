@@ -79,6 +79,7 @@ StructSpecifier:STRUCT OptTag LC DefList RC { // 结构体定义
         $1->nodetag = 4;
         $2->nodetag = 4;
         newsymbol($1,$2);
+        quitblock();
     }
     |STRUCT Tag { // 结构体引用
         $$=newnode("StructSpecifier",2,$1,$2);
@@ -126,7 +127,10 @@ ParamDec:Specifier VarDec {
     }
     ;
 /*Statement*/
-Compst:LC DefList StmtList RC { $$=newnode("Compst",4,$1,$2,$3,$4); }
+Compst:LC DefList StmtList RC { 
+        $$=newnode("Compst",4,$1,$2,$3,$4); 
+        quitblock();
+    }
     ;
 StmtList:Stmt StmtList{$$=newnode("StmtList",2,$1,$2);}
     | {$$=newnode("StmtList",0,-1);}
@@ -208,7 +212,9 @@ Exp:Exp ASSIGNOP Exp {
             $$->nodetag = 0;
         }
         |Exp STAR Exp{
+            
             $$=newnode("Exp",3,$1,$2,$3);
+            eval($$,0);
             if(strcmp($1->type, $3->type)) // Error type 7 操作数类型不匹配
                 printf("Error type 7 at Line %d: Type Mismatched for Operation\n ",yylineno);
             $$->nodetag = 0;
@@ -229,6 +235,8 @@ Exp:Exp ASSIGNOP Exp {
                 printf("Error type 9 at Line %d: Number of Parameters Mismatched\n ",yylineno);
             rpnum = 0;
             $$=newnode("Exp",4,$1,$2,$3,$4);
+            if(!strcmp(currentfunction->name, $1->content.c))
+                $$->type = "int";
         }
         |ID LP RP {
             if(getdefined($1) == 1 && strcmp(currentfunction->name, $1->content.c)!=0) // 11- 对普通变量使用了函数调用的操作符 

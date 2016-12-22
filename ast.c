@@ -90,8 +90,6 @@ struct astnode *newnode(char*  gramname,int num,...)//抽象语法树建立
         {
             if(!strcmp(a->gramname,"LC"))
                 ++CurrentLevel;
-            else if(!strcmp(a->gramname,"RC"))
-                quitblock();
             // 意为存储当前词法分析器返回的yytext字符串。若直接a->content.c=yytext，则a->content.c之后会变化。（由于是指针）
             char* s;
             s=(char*)malloc(sizeof(char* )*40);
@@ -192,7 +190,6 @@ struct para *adddeflist(struct astnode* deflist) {
 
 // VarList:ParamDec COMMA VarList | ParamDec  记录函数所有形参
 struct para *addparalist(struct astnode* varlist) { 
-    
 
     struct para *paralist = (struct para*)malloc(sizeof(struct para));
     struct astnode *a = varlist;
@@ -223,6 +220,7 @@ void addfunction(struct astnode* funid)
 {
     currentfunction->name = funid->content.c;
     currentfunction->pnum = paranum;
+
     printf("------addfunction: %s\n", currentfunction->name);
 }
 
@@ -247,6 +245,8 @@ void newsymbol(struct astnode* type, struct astnode* arg)
         }
         else
             p->info.paralist = addparalist(arg->l->r->r);
+
+        printf("--------------newsymbol\n");
         if(havedefined(p->name)) 
             printf("Error type 4 at Line %d: Redefined Function '%s'\n",yylineno,p->name);
         p->pnum = paranum;
