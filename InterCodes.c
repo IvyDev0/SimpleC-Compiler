@@ -85,10 +85,8 @@ void trans_exp(struct astnode* exp, char* place)
 	
 	if(exp->l->r && !strcmp(exp->l->r->gramname,"LP"))
 	{
-
 		if(!strcmp(exp->l->r->r->gramname,"Args"))
 		{
-
 			char* function = exp->l->content.c;
     		struct arglist* arg_head = (struct arglist*)malloc(sizeof(struct arglist));
     		arg_head->next = NULL;
@@ -182,8 +180,8 @@ void trans_stmt(struct astnode* stmt)
 {
 	if(!strcmp(stmt->l->gramname,"Exp"))
 		trans_exp(stmt->l, NULL);
-	else if(!strcmp(stmt->l->gramname,"CompSt"))
-		trans(stmt->l);
+	else if(!strcmp(stmt->l->gramname,"Compst")) 
+		trans(stmt->l->l);
 	else if(!strcmp(stmt->l->gramname,"RETURN"))
 	{
 		char* tmp = new_temp();
@@ -252,8 +250,6 @@ void trans(struct astnode *current)
 	else if(!strcmp(current->gramname,"Stmt"))
 	{
 		trans_stmt(current);
-		if(current->l)
-			trans(current->l);
 		if(current->r)
 			trans(current->r);
 	}
@@ -261,10 +257,6 @@ void trans(struct astnode *current)
 	{
 		char* tmp = new_temp();
 		trans_exp(current, tmp);
-		if(current->l)
-			trans(current->l);
-		if(current->r)
-			trans(current->r);
 	}
 	// Dec -> VarDec, 当VarDec是数组或结构体时， 
 	else if(!strcmp(current->gramname,"Dec") && (current->l->r==NULL))

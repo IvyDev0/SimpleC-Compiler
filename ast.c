@@ -237,13 +237,11 @@ void newsymbol(struct astnode* type, struct astnode* arg)
     p->type = type->content.c; 
     p->line = arg->nodeline;
     p->tag = arg->nodetag;
-    //printf("ParamDec:Specifier VarDec - tag:%d\n", p->tag);
 
     p->name = arg->content.c;
     p->level = CurrentLevel;
 
     if(arg->nodetag == 5) {
-        //printf("ParamDec:Specifier VarDec ---- %s\n", arg->l->r->r->gramname);
         if(!strcmp(arg->l->r->r->gramname,"RP")){
             p->info.paralist = NULL;
         }
@@ -351,7 +349,6 @@ quitblock() {
 int 
 getdefined(struct astnode* current) {
     struct symbol* p = tablehead->next;
-    //printf("tablehead------:%s, %s\n", tablehead->next->name, current->content.c);
     while(p!=NULL)
     {
         if(!strcmp(p->name,current->content.c)) 
