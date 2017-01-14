@@ -1,6 +1,6 @@
-#include <string.h> 
+#include <string.h>
 #include <unistd.h>
-#include <stdio.h> 
+#include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <stdarg.h>
@@ -58,7 +58,7 @@ char* rtype; // 记录当前函数实际返回值类型
 int dim[MAXNUM];
 int dimcount;
 
-int tempcount, labelcount; 
+int tempcount, labelcount, regcount, firstreg; 
 
 
 // 符号表
@@ -69,10 +69,10 @@ struct symbol
     int level; // 所在可见域
     char* name; // 符号名
     char* type; // int/float
-    struct symbol* next; 
+    struct symbol* next;
 
-    union { 
-		struct para* paralist; // 记录结构体域内成员/函数形参        
+    union {
+		struct para* paralist; // 记录结构体域内成员/函数形参
 		int dimension[MAXNUM]; // 记录数组的每维大小
     } info;
     int pnum; // 函数形参数个数

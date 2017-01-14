@@ -17,17 +17,17 @@ struct astnode *newnode(char*  gramname,int num,...)//抽象语法树建立
 
     if(num>0) // num>0为非终结符，左孩子右兄弟表示法
     {
-        temp=va_arg(valist, struct astnode*); // 取变长参数列表中的第一个结点设为a的左孩子
+        temp = va_arg(valist, struct astnode*); // 取变长参数列表中的第一个结点设为a的左孩子
 
         a->l = temp;
         a->r = NULL;
         // 左结点直接向父节点传递的值：行号、语义、nodetag、type
         a->nodeline = temp->nodeline;
-        a->content = temp->content;
         a->nodetag = temp->nodetag;
         a->type = temp->type;
+        a->content = temp->content;
 
-        if(num > 1)  
+        if(num > 1)
         {
             for(i=0; i<num-1; ++i) // 依次取变长参数列表中的剩余结点，为左结点
             {
@@ -40,7 +40,7 @@ struct astnode *newnode(char*  gramname,int num,...)//抽象语法树建立
     {
         int t=va_arg(valist, int); //取第1个变长参数
         a->nodeline=t;
-        if(!strcmp(a->gramname,"INTEGER")) 
+        if(!strcmp(a->gramname,"INTEGER"))
         {
             a->type="int";
             a->content.f=atof(yytext);
@@ -57,7 +57,7 @@ struct astnode *newnode(char*  gramname,int num,...)//抽象语法树建立
             char * p = yytext;
             int length = strlen(p);
             int n=0, k=1;
-            
+
             for (int i = length-1; i > 0; i--)
             {
                 n += k*(p[i]-48);
@@ -81,7 +81,7 @@ struct astnode *newnode(char*  gramname,int num,...)//抽象语法树建立
                     n += k*(p[i]-55);
                 if(p[i]>=97 && p[i]<=122) { // a-z
                     n += (p[i]-87)*k;
-                }   
+                }
                 k *= 16;
             }
             a->content.f = n;
@@ -93,11 +93,11 @@ struct astnode *newnode(char*  gramname,int num,...)//抽象语法树建立
             // 意为存储当前词法分析器返回的yytext字符串。若直接a->content.c=yytext，则a->content.c之后会变化。（由于是指针）
             char* s;
             s=(char*)malloc(sizeof(char* )*40);
-            strcpy(s,yytext);     
+            strcpy(s,yytext);
             a->content.c = s;
         }
     }
-    printf("newnode:  %d, %s\n", a->nodeline, a->gramname);
+    //printf("newnode:  %d, %s\n", a->nodeline, a->gramname);
     return a;
 }
 
@@ -129,8 +129,8 @@ void freeast(struct astnode* current) {
         struct astnode* l = current->l;
         struct astnode* r = current->r;
         free(current);
-        freeast(l); 
-        freeast(r); 
+        freeast(l);
+        freeast(r);
     }
 }
 
@@ -154,13 +154,13 @@ struct names *adddeclist(struct astnode* declist) {
     p->next = NULL;
 
     p = decnamelist;
-    while(p) 
+    while(p)
         p = p->next;
-    
-    return decnamelist;        
+
+    return decnamelist;
 }
 
-struct para *adddeflist(struct astnode* deflist) { 
+struct para *adddeflist(struct astnode* deflist) {
     struct para *paralist = (struct para*)malloc(sizeof(struct para));
     struct astnode *a = deflist;
     struct para *p = paralist;
@@ -176,11 +176,11 @@ struct para *adddeflist(struct astnode* deflist) {
     p->type = a->type;
     p->namelist = a->l->decnamelist;
     p->next = NULL;
-    
+
 
     p = paralist;
     while(p) {
-        printf("------ deflist: %s, %s\n", p->type, p->namelist->name);
+        //printf("------ deflist: %s, %s\n", p->type, p->namelist->name);
         p = p->next;
     }
 
@@ -189,7 +189,7 @@ struct para *adddeflist(struct astnode* deflist) {
 
 
 // VarList:ParamDec COMMA VarList | ParamDec  记录函数所有形参
-struct para *addparalist(struct astnode* varlist) { 
+struct para *addparalist(struct astnode* varlist) {
 
     struct para *paralist = (struct para*)malloc(sizeof(struct para));
     struct astnode *a = varlist;
@@ -221,18 +221,18 @@ void addfunction(struct astnode* funid)
     currentfunction->name = funid->content.c;
     currentfunction->pnum = paranum;
 
-    printf("------addfunction: %s\n", currentfunction->name);
+    //printf("------addfunction: %s\n", currentfunction->name);
 }
 
 // 建立符号表
 // $1->content.c提供type；$2->decnamelist提供同一type的name,tag；line。
 // 全局变量CurrentLevel提供level；paranum提供形参个数pnum。
-void newsymbol(struct astnode* type, struct astnode* arg) 
+void newsymbol(struct astnode* type, struct astnode* arg)
 {
 
     struct symbol *p = (struct symbol*)malloc(sizeof(struct symbol));
 
-    p->type = type->content.c; 
+    p->type = type->content.c;
     p->line = arg->nodeline;
     p->tag = arg->nodetag;
 
@@ -246,8 +246,8 @@ void newsymbol(struct astnode* type, struct astnode* arg)
         else
             p->info.paralist = addparalist(arg->l->r->r);
 
-        printf("--------------newsymbol\n");
-        if(havedefined(p->name)) 
+        //printf("--------------newsymbol\n");
+        if(havedefined(p->name))
             printf("Error type 4 at Line %d: Redefined Function '%s'\n",yylineno,p->name);
         p->pnum = paranum;
         paranum = 0;
@@ -259,7 +259,7 @@ void newsymbol(struct astnode* type, struct astnode* arg)
         currentfunction->name = "";
         currentfunction->pnum = 0;
 
-        printf("newsymbol: %s, tag:%d, type: %s, CurrentLevel: %d\n", tablehead->next->name, tablehead->next->tag, tablehead->next->type, CurrentLevel);
+        //printf("newsymbol: %s, tag:%d, type: %s, CurrentLevel: %d\n", tablehead->next->name, tablehead->next->tag, tablehead->next->type, CurrentLevel);
 
     } else if(arg->nodetag == 4) {
 
@@ -267,29 +267,29 @@ void newsymbol(struct astnode* type, struct astnode* arg)
             p->info.paralist = adddeflist(arg->r->r);
         else
             p->info.paralist = NULL;
-        if(havedefined(p->name)) 
+        if(havedefined(p->name))
             printf("Error type 16 at Line %d: Duplicated Structure Name '%s'\n",yylineno,p->name);
         // 插在表头
         p->next = tablehead->next;
         tablehead->next = p;
 
-        printf("newsymbol: %s, tag:%d, type: %s, CurrentLevel: %d\n", tablehead->next->name, tablehead->next->tag, tablehead->next->type, CurrentLevel);
+        //printf("newsymbol: %s, tag:%d, type: %s, CurrentLevel: %d\n", tablehead->next->name, tablehead->next->tag, tablehead->next->type, CurrentLevel);
 
     } else {
         struct names *namelist = arg->decnamelist;
         while(namelist) {
             struct symbol *p = (struct symbol*)malloc(sizeof(struct symbol));
-            p->type = type->content.c; 
+            p->type = type->content.c;
             p->line = arg->nodeline;
             if(paramark == 1)
                 p->level = CurrentLevel+1;
             else
-                p->level = CurrentLevel;            
+                p->level = CurrentLevel;
 
             p->tag = namelist->tag;
             p->name = namelist->name;
 
-            if(p->tag == 2) 
+            if(p->tag == 2)
             {
                 for (int i = 0; i < dimcount; ++i)
                 {
@@ -299,7 +299,7 @@ void newsymbol(struct astnode* type, struct astnode* arg)
                 dimcount = 0;
             }
 
-            if(havedefined(p->name)) 
+            if(havedefined(p->name))
                 printf("Error type 3 at Line %d: Redefined Variable '%s'\n",yylineno,arg->content.c);
 
             namelist = namelist->next;
@@ -307,7 +307,7 @@ void newsymbol(struct astnode* type, struct astnode* arg)
             p->next = tablehead->next;
             tablehead->next = p;
 
-            printf("newsymbol: %s, tag:%d, type: %s, CurrentLevel: %d\n", tablehead->next->name, tablehead->next->tag, tablehead->next->type, CurrentLevel);
+            //printf("newsymbol: %s, tag:%d, type: %s, CurrentLevel: %d\n", tablehead->next->name, tablehead->next->tag, tablehead->next->type, CurrentLevel);
         }
     }
 }
@@ -327,11 +327,11 @@ bool havedefined(char* name) {
 
 
 // 释放当前level的变量
-void 
+void
 quitblock() {
     struct symbol* p = tablehead->next, * tp = p;
     if(p == NULL) {
-        printf("quitblock: The table is empty.");
+        //printf("quitblock: The table is empty.");
         return;
     }
     while(p!=NULL && p->level == CurrentLevel) {
@@ -341,17 +341,17 @@ quitblock() {
     }
     tablehead->next = p;
     --CurrentLevel;
-    printf("quitblock: CurrentLevel: %d\n", CurrentLevel);
+    //printf("quitblock: CurrentLevel: %d\n", CurrentLevel);
 }
 
 
 // 内->外 逐层检查符号表  检查符号是否已定义 返回其tag值且赋予其type
-int 
+int
 getdefined(struct astnode* current) {
     struct symbol* p = tablehead->next;
     while(p!=NULL)
     {
-        if(!strcmp(p->name,current->content.c)) 
+        if(!strcmp(p->name,current->content.c))
         {
             current->nodetag = p->tag;
             current->type = p->type;
@@ -362,13 +362,13 @@ getdefined(struct astnode* current) {
     return 0;
 }
 
-int 
+int
 getpnum(struct astnode* current)
 {
     struct symbol* p = tablehead->next;
     while(p!=NULL)
     {
-        if(!strcmp(p->name,current->content.c)) 
+        if(!strcmp(p->name,current->content.c))
         {
             return p->pnum;
         }
@@ -378,24 +378,24 @@ getpnum(struct astnode* current)
 }
 
 
-void 
-visitstruct(struct astnode* exp, struct astnode* id) 
+void
+visitstruct(struct astnode* exp, struct astnode* id)
 {
     struct symbol* p = tablehead->next;
     while(p)
     {
-        if(!strcmp(p->name,exp->content.c)) 
+        if(!strcmp(p->name,exp->content.c))
         { // exp有定义
             struct symbol* q = p->next;
             while(q)
             {
-                if(!strcmp(q->name,exp->type)) 
+                if(!strcmp(q->name,exp->type))
                 { // exp是结构体对象，找到对应结构体q
                     struct para *deflist = q->info.paralist;
-                    while(deflist) 
+                    while(deflist)
                     {
                         struct names *namelist = deflist->namelist;
-                        while(namelist) 
+                        while(namelist)
                         {
                             if(!strcmp(namelist->name,id->content.c))
                                 return;
@@ -406,7 +406,7 @@ visitstruct(struct astnode* exp, struct astnode* id)
                     printf("Error type 14 at Line %d: Undifined Structure Member ‘%s’\n", yylineno, id->content.c);
                 }
                 q = q->next;
-            }            
+            }
         }
         p=p->next;
     }
@@ -415,7 +415,7 @@ visitstruct(struct astnode* exp, struct astnode* id)
 }
 
 
-void 
+void
 freetable() {
     struct symbol* p = tablehead->next,  * tp = p;
     while(p->level != CurrentLevel) {
@@ -427,7 +427,7 @@ freetable() {
     printf("\nSymbol table cleaned.\n\n");
 }
 
-void 
+void
 checkreturn(struct astnode* exp) {
     struct symbol* p = tablehead->next;
     while(p && p->tag==5)
@@ -437,7 +437,7 @@ checkreturn(struct astnode* exp) {
     printf("Error type 8 at Line %d: Type Mismatched for Return\n",yylineno);
 }
 
-void 
+void
 yyerror(char*s,...) //变长参数错误处理函数
 {
     va_list ap;
@@ -453,7 +453,6 @@ int main()
     tablehead = (struct symbol*)malloc(sizeof(struct symbol));
     currentfunction = (struct symbol*)malloc(sizeof(struct symbol));
 
-    //tablehead->next = NULL;    
     rpnum = 0;
     paranum = 0;
     CurrentLevel = 0;
@@ -461,6 +460,8 @@ int main()
     tempcount = 0;
     labelcount = 0;
     paramark = 0;
+    regcount = 0;
+    firstreg = 0;
     // 在符号表中预先添加read和write
     struct symbol* read = (struct symbol*)malloc(sizeof(struct symbol));
     struct symbol* write = (struct symbol*)malloc(sizeof(struct symbol));
@@ -472,7 +473,7 @@ int main()
     read->level = 0;
     write->name = "write";
     write->tag = 5;
-    write->pnum = 1; 
+    write->pnum = 1;
     write->info.paralist = (struct para*)malloc(sizeof(struct para));
     write->info.paralist->type = "int";
     write->type = "int";
@@ -480,7 +481,7 @@ int main()
 
     tablehead->next = read;
     read->next = write;
-    write->next = NULL;    
+    write->next = NULL;
 
     return yyparse(); //启动文法分析，调用词法分析
 }

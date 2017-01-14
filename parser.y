@@ -36,7 +36,10 @@ Program:ExtDefList {
         eval($$,0);
         printf("Finish printing.\n\n");
 
+        openfile();
         trans($$);
+        closefile();
+
         freeast($$);
         freetable();
     }
@@ -61,8 +64,8 @@ ExtDef:Specifier ExtDecList SEMI {
     |Specifier SEMI { $$=newnode("ExtDef",2,$1,$2); }
     |Specifier FunDec Compst {
         $$=newnode("ExtDef",3,$1,$2,$3);
-        $2->nodetag = 5; 
-        newsymbol($1,$2); 
+        $2->nodetag = 5;
+        newsymbol($1,$2);
     }
     ;
 ExtDecList:VarDec { $$=newnode("ExtDecList",1,$1); }
@@ -85,7 +88,7 @@ StructSpecifier:STRUCT OptTag LC DefList RC { // 结构体定义
         $$=newnode("StructSpecifier",2,$1,$2);
         $$->content = $2->content;
         $$->nodetag = 4;
-        if(getdefined($2) != 4) 
+        if(getdefined($2) != 4)
             printf("Error type 17 at Line %d: Undefined Structure '%s'\n",yylineno,$2->content.c);
     }
     ;
@@ -98,25 +101,25 @@ Tag:ID {$$=newnode("Tag",1,$1);}
 VarDec:ID { $$=newnode("VarDec",1,$1); $$->nodetag = 1; }
     | VarDec LB INTEGER RB {$$=newnode("VarDec",4,$1,$2,$3,$4); $$->nodetag = 2; dim[dimcount] = (int)$3->content.f; ++dimcount; }
     ;
-FunDec:ID LP VarList RP { 
-        $$=newnode("FunDec",4,$1,$2,$3,$4); 
-        $1->nodetag = 6; 
+FunDec:ID LP VarList RP {
+        $$=newnode("FunDec",4,$1,$2,$3,$4);
+        $1->nodetag = 6;
         addfunction($1);
     }
-    |ID LP RP { 
-        $$=newnode("FunDec",3,$1,$2,$3); 
-        $$->nodetag = 5; 
-        $1->nodetag = 6; 
+    |ID LP RP {
+        $$=newnode("FunDec",3,$1,$2,$3);
+        $$->nodetag = 5;
+        $1->nodetag = 6;
         addfunction($1);
     }
     ;
 VarList:ParamDec COMMA VarList {$$=newnode("VarList",3,$1,$2,$3); ++paranum; }
     |ParamDec {$$=newnode("VarList",1,$1); paranum = 1; }
     ;
-ParamDec:Specifier VarDec { 
+ParamDec:Specifier VarDec {
         $$=newnode("ParamDec",2,$1,$2);
-        $$->type = $1->type; 
-        $$->nodetag = $2->nodetag; 
+        $$->type = $1->type;
+        $$->nodetag = $2->nodetag;
         $$->content = $2->content;
         $2->decnamelist = (struct names*)malloc(sizeof(struct names));
         $2->decnamelist->name = $2->content.c;
@@ -127,8 +130,8 @@ ParamDec:Specifier VarDec {
     }
     ;
 /*Statement*/
-Compst:LC DefList StmtList RC { 
-        $$=newnode("Compst",4,$1,$2,$3,$4); 
+Compst:LC DefList StmtList RC {
+        $$=newnode("Compst",4,$1,$2,$3,$4);
         quitblock();
     }
     ;
@@ -137,8 +140,8 @@ StmtList:Stmt StmtList{$$=newnode("StmtList",2,$1,$2);}
     ;
 Stmt:Exp SEMI {$$=newnode("Stmt",2,$1,$2);}
     |Compst {$$=newnode("Stmt",1,$1);}
-    |RETURN Exp SEMI { 
-        $$=newnode("Stmt",3,$1,$2,$3); 
+    |RETURN Exp SEMI {
+        $$=newnode("Stmt",3,$1,$2,$3);
         //checkreturn($2);
     }
     |IF LP Exp RP Stmt %prec LOWER_THAN_ELSE {$$=newnode("Stmt",5,$1,$2,$3,$4,$5);}
@@ -212,7 +215,7 @@ Exp:Exp ASSIGNOP Exp {
             $$->nodetag = 0;
         }
         |Exp STAR Exp{
-            
+
             $$=newnode("Exp",3,$1,$2,$3);
             eval($$,0);
             if(strcmp($1->type, $3->type)) // Error type 7 操作数类型不匹配
@@ -228,8 +231,8 @@ Exp:Exp ASSIGNOP Exp {
         |LP Exp RP{ $$=newnode("Exp",3,$1,$2,$3); }
         |MINUS Exp { $$=newnode("Exp",2,$1,$2); }
         |NOT Exp { $$=newnode("Exp",2,$1,$2); }
-        |ID LP Args RP { 
-            if(getdefined($1) != 5 && strcmp(currentfunction->name, $1->content.c)!=0 ) // Error type 2 检查函数是否未定义就调用 
+        |ID LP Args RP {
+            if(getdefined($1) != 5 && strcmp(currentfunction->name, $1->content.c)!=0 ) // Error type 2 检查函数是否未定义就调用
                 printf("Error type 2 at Line %d: Undefined Function '%s'\n ",yylineno,$1->content.c);
             else if( (getpnum($1)==-1 && currentfunction->pnum!=rpnum) && getpnum($1) != rpnum) // 9 - 函数调用时实参与形参的数目不匹配 
                 printf("Error type 9 at Line %d: Number of Parameters Mismatched\n ",yylineno);
@@ -241,23 +244,23 @@ Exp:Exp ASSIGNOP Exp {
         |ID LP RP {
             if(getdefined($1) == 1 && strcmp(currentfunction->name, $1->content.c)!=0) // 11- 对普通变量使用了函数调用的操作符 
                 printf("Error type 11 at Line %d: Illegal call %s()\n ",yylineno,$1->content.c);
-            else if(  (getpnum($1)==-1 && currentfunction->pnum!=rpnum) && getpnum($1) != 0) 
+            else if(  (getpnum($1)==-1 && currentfunction->pnum!=rpnum) && getpnum($1) != 0)
                 printf("Error type 9 at Line %d: Number of Parameters Mismatched\n ",yylineno);
             $$=newnode("Exp",3,$1,$2,$3);
         }
         |Exp LB Exp RB {
-            
+
             if(getdefined($1) == 0)
                 printf("Error type 1 at Line %d: Undefined Variable '%s'\n ",yylineno,$1->content.c);
             else if(getdefined($1) != 2) // Error type 10 对非数组类型使用了[]数组访问的操作符 
                 printf("Error type 10 at Line %d: '%s'is not an array.\n ",yylineno,$1->content.c);
-            else if(!strcmp($3->type,"int")) // Error type 12 数组访问下标出现了非整数 
+            else if(!strcmp($3->type,"int")) // Error type 12 数组访问下标出现了非整数
                 printf("Error type 12 at Line %d: %.1f is not a integer.\n",yylineno,$3->content.f);
-            else 
+            else
                 $$->nodetag = 2;
             $$=newnode("Exp",4,$1,$2,$3,$4);
         }
-        |Exp DOT ID { 
+        |Exp DOT ID {
             $$=newnode("Exp",3,$1,$2,$3);
             if(getdefined($1) != 3) // Error type 13 对非结构体变量使用了.操作
                 printf("Error type 13 at Line %d:Illegal use of '.'.\n",yylineno);
@@ -265,10 +268,10 @@ Exp:Exp ASSIGNOP Exp {
                 visitstruct($1,$3);
             }
         }
-        |ID { 
+        |ID {
             if(getdefined($1) == 0)
                 printf("Error type 1 at Line %d: Undifined Variable %s\n", yylineno, $1->content.c);
-            $$=newnode("Exp",1,$1); 
+            $$=newnode("Exp",1,$1);
         }
         |INTEGER { $$=newnode("Exp",1,$1); $$->nodetag = 0; }
         |FLOAT { $$=newnode("Exp",1,$1); $$->nodetag = 0; }

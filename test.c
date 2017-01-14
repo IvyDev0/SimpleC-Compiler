@@ -1,13 +1,14 @@
-int fact(int n)
-{
-	if(n==1)
-		return 1;
-	else
-		return n*fact(n-1);
-}
 int main()
 {
-	int n = read();
-
-	return fact(n);
+	int a = 0, b = 1, i = 0, n, c;
+	n = read();
+	while (i<n)
+	{
+		c = a+b;
+		write(b);
+		a = b;
+		b = c;
+		i = i+1;
+	}
+	return 0;
 }
